@@ -11,6 +11,7 @@ Add this to your application's `shard.yml`:
 dependencies:
   kemal-session:
     github: Thyra/kemal-session
+    branch: master
 ```
 
 

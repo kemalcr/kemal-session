@@ -109,4 +109,4 @@ Session.config.cookie_name = "foobar"
 - a smart way of automatic saving...
 - storing of more data types, including arrays and possibly hashes
 - engines for memory (sessions are stored in process memory), mysql and postregsql (sessions are stored in database)
-- secure session id against brute force attacks by binding it do ip adress and user agent
+- secure session id against brute force attacks by binding it to ip adress and user agent

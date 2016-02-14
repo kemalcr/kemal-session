@@ -21,12 +21,12 @@ class Session
     end
 
     def sessions_dir=(v : String) : String
-      raise ArgumentError, "Session: Cannot write to directory #{v}" unless File.directory? v && File.writable? v
+      raise ArgumentError.new("Session: Cannot write to directory #{v}") unless File.directory?(v) && File.writable?(v)
       @sessions_dir = v
     end
 
     def engine=(v : String) : String
-      raise ArgumentError, "Session: Unknown engine #{v}" unless ENGINES.includes? v
+      raise ArgumentError.new("Session: Unknown engine #{v}") unless ENGINES.includes? v
       @engine = v
     end
   end # Config

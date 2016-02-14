@@ -2,7 +2,24 @@ require "spec"
 require "../src/kemal-session"
 require "http"
 
+def create_context(session_id : String)
+  response = HTTP::Server::Response.new(MemoryIO.new)
+  headers = HTTP::Headers.new
+
+  # I would rather pass nil if no cookie should be created
+  # but that throws an error
+  unless session_id == ""
+    cookies = HTTP::Cookies.new 
+    cookies << HTTP::Cookie.new(Session.config.cookie_name, session_id)
+    cookies.add_request_headers(headers)
+  end
+
+  request = HTTP::Request.new("GET", "/" , headers)
+  return HTTP::Server::Context.new(request, response)
+end
+
 Spec.before_each do
-  fake_context = HTTP::Server::Context.new(HTTP::Request.new("hello", nil), HTTP::Server::Response.new("ha"))
-  $session = Session.start(fake_context)
+  Session.config do |config|
+    sessions_dir = "./spec/assets/sessions"
+  end
 end

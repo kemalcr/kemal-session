@@ -25,17 +25,16 @@ require "kemal-session"
 
 get "/set" do |env|
   session = Session.start(env)
-  session.int["number"] = rand(100)
-  session.save
+  session.int("number", rand(100)) # set the value of "number"
 end
 
 get "/get" do |env|
   session = Session.start(env)
-  session.int["number"]
+  session.int("number") # get the value of "number"
+  session.int?("hello") # get value or nil, like []?
 end
 ```
-The session can save Int32, String, Float64 and Bool values. Use ```session.int```, ```session.string```, ```session.float``` and ```session.bool``` for that, they are all Hashes with String keys.
-Whenever you change something in the session call session.save at the end of the block so that your changes are saved (I know this is horrible and I promise it won't stay like that).
+The session can save Int32, String, Float64 and Bool values. Use ```session.int```, ```session.string```, ```session.float``` and ```session.bool``` for that.
 
 Another example
 ```crystal
@@ -44,27 +43,25 @@ require "kemal-session"
 
 get "/rand" do |env|
   session = Session.start(env)
-  if session.int.has_key? "random_number"
-    env.response.print "The last random number was #{session.int["random_number"]}. "
+  if session.int? "random_number"
+    env.response.print "The last random number was #{session.int("random_number")}. "
   else
     env.response.print "This is the first random number. "
   end
   random_number = rand(500)
   env.response.print "Setting the random number to #{random_number}"
-  session.int["random_number"] = random_number
-  session.save
+  session.int("random_number", random_number)
 end
 
 get "/set" do |env|
   session = Session.start(env)
-  session.string[env.params["key"].to_s] = env.params["value"].to_s
-  session.save
+  session.string(env.params["key"].to_s, env.params["value"].to_s)
 end
 
 get "/get" do |env|
   session = Session.start(env)
-  if session.string.has_key? env.params["key"].to_s
-    "The value of #{env.params["key"]} is #{session.string[env.params["key"].to_s]}"
+  if session.string? env.params["key"].to_s
+    "The value of #{env.params["key"]} is #{session.string(env.params["key"].to_s)}"
   else
     "There is no value for this key."
   end
@@ -77,6 +74,14 @@ get "/view" do |env|
 end
 ```
 Open ```/set?key=foo&value=bar``` to set the value of *foo* to *bar* in your session. Then open ```/get?key=foo``` to retrieve it.
+
+You can also access the underyling hash directly by appending ``s`` to the name: ``session.ints``. This way you can use hash functions like
+```crystal
+session.ints.each do |k, v|
+  puts "#{k} => #{v}"
+end
+```
+**BUT:** This should only be used for reading and analyzing values, **never for changing them**. Because otherwise the session won't automatically save the changes and you will produce really weird bugs... 
 
 ### Configuration
 

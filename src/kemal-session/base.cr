@@ -2,22 +2,40 @@ require "crypto/md5"
 require "json"
 
 class Session
-  JSON.mapping({
-    id:     String,
 
-    int:    Hash(String, Int32),
-    string: Hash(String, String),
-    float:  Hash(String, Float64),
-    bool:   Hash(String, Bool),
-  })
+  # @TODO Is there any way to outsource this to another file?
+  macro define_storage(vars)
+    JSON.mapping({
+      id: String,
 
-  def initialize(id : String)
-    @id = id
+      {% for name, type in vars %}
+           {{name.id}}s: Hash(String, {{type}}),
+      {% end %}
+    })
 
-    @int = Hash(String, Int32).new
-    @string = Hash(String, String).new
-    @float = Hash(String, Float64).new
-    @bool = Hash(String, Bool).new
+    {% for name, type in vars %}
+      @{{name.id}}s = Hash(String, {{type}}).new
+      getter {{name.id}}s
+
+      def {{name.id}}(k : String) : {{type}}
+        return @{{name.id}}s[k]
+      end    
+
+      def {{name.id}}?(k : String) : {{type}}?
+        return @{{name.id}}s[k]?
+      end
+
+      def {{name.id}}(k : String, v : {{type}})
+        @{{name.id}}s[k] = v
+        save
+      end
+    {% end %}
+
+  end
+
+  define_storage({int: Int32, string: String, float: Float64, bool: Bool})
+
+  def initialize(@id : String)
   end
 
   def self.start(context) : Session

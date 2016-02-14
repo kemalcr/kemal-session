@@ -21,7 +21,7 @@ class Session
     end
 
     def sessions_dir=(v : String) : String
-      # @TODO check if path exists
+      raise ArgumentError, "Session: Cannot write to directory #{v}" unless File.directory? v && File.writable? v
       @sessions_dir = v
     end
 

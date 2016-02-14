@@ -1,7 +1,6 @@
 class Session
   class Config
     INSTANCE = self.new
-    ENGINES  = ["filesystem"]
 
     @timeout      : Time::Span
     @gc_interval  : Time::Span

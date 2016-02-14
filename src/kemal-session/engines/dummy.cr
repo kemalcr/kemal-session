@@ -4,7 +4,6 @@ class Session
   class DummyEngine < Engine
 
     macro define_storage(vars)
-
       {% for name, type in vars %}
 
         def {{name.id}}(session_id : String, k : String) : {{type}}

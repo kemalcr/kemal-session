@@ -42,6 +42,7 @@ class Session
     @cached_session_id : String
 
     def initialize(options : Hash(Symbol, String))
+      # @TODO make options optional (default value for sessions_dir = ./sessions/, maybe add format option (json, yaml...))
       raise ArgumentError.new("FileSystemEngine: Mandatory option sessions_dir not set") unless options.has_key? :sessions_dir
       raise ArgumentError.new("FileSystemEngine: Cannot write to directory #{options[:sessions_dir]}") unless File.directory?(options[:sessions_dir]) && File.writable?(options[:sessions_dir])
       @sessions_dir = options[:sessions_dir]
@@ -61,11 +62,12 @@ class Session
     end
 
     def load_into_cache(session_id : String) : StorageInstance
-      unless session_id == @cached_session_id
-        @cache = read_or_create_storage_instance(session_id)
-        @cached_session_id = session_id
-      end
-      return @cache
+      @cached_session_id = session_id
+      return @cache = read_or_create_storage_instance(session_id)
+    end
+
+    def is_in_cache?(session_id : String) : Bool
+      return session_id == @cached_session_id
     end
 
     def save_cache
@@ -82,27 +84,28 @@ class Session
       end
     end
 
+    # Delegating int(k,v), int?(k) etc. from Engine to StorageInstance
     macro define_delegators(vars)
       {% for name, type in vars %}
 
         def {{name.id}}(session_id : String, k : String) : {{type}}
-          load_into_cache(session_id)
+          load_into_cache(session_id) unless is_in_cache?(session_id)
           return @cache.{{name.id}}(k)
         end    
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?
-          load_into_cache(session_id)
+          load_into_cache(session_id) unless is_in_cache?(session_id)
           return @cache.{{name.id}}?(k)
         end
 
         def {{name.id}}(session_id : String, k : String, v : {{type}})
-          load_into_cache(session_id)
+          load_into_cache(session_id) unless is_in_cache?(session_id)
           @cache.{{name.id}}(k, v)
           save_cache
         end
 
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-          load_into_cache(session_id)
+          load_into_cache(session_id) unless is_in_cache?(session_id)
           return @cache.{{name.id}}s
         end
       {% end %}

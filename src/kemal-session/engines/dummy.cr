@@ -28,7 +28,7 @@ class Session
     define_storage({int: Int32, string: String, float: Float64, bool: Bool})
 
     def initialize(options : Hash(Symbol, String))
-      puts "Initalizing DummyEngine with these options: #{options}"
+      # Initalizing DummyEngine
     end
 
     def run_gc

@@ -9,6 +9,9 @@ class Session
   end
 
   def self.start(context) : Session
+    # @TODO this is not really optimal, as it has to be checked at each session start
+    Session.config.set_default_engine unless Session.config.engine_set?
+
     instance = new(id_from_context(context) || generate_id)
     instance.update_context(context)
     return instance

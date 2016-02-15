@@ -38,10 +38,16 @@ class Session
       define_storage({int: Int32, string: String, float: Float64, bool: Bool})
     end
 
+    @cache : StorageInstance
+    @cached_session_id : String
+
     def initialize(options : Hash(Symbol, String))
       raise ArgumentError.new("FileSystemEngine: Mandatory option sessions_dir not set") unless options.has_key? :sessions_dir
       raise ArgumentError.new("FileSystemEngine: Cannot write to directory #{options[:sessions_dir]}") unless File.directory?(options[:sessions_dir]) && File.writable?(options[:sessions_dir])
       @sessions_dir = options[:sessions_dir]
+
+      @cache = StorageInstance.new
+      @cached_session_id = ""
     end
 
     def run_gc
@@ -52,6 +58,18 @@ class Session
           File.delete full_path if age.total_seconds > Session.config.timeout.total_seconds
         end
       end
+    end
+
+    def load_into_cache(session_id : String) : StorageInstance
+      unless session_id == @cached_session_id
+        @cache = read_or_create_storage_instance(session_id)
+        @cached_session_id = session_id
+      end
+      return @cache
+    end
+
+    def save_cache
+      File.write(@sessions_dir + @cached_session_id + ".json", @cache.to_json)
     end
 
     def read_or_create_storage_instance(session_id : String) : StorageInstance
@@ -68,24 +86,24 @@ class Session
       {% for name, type in vars %}
 
         def {{name.id}}(session_id : String, k : String) : {{type}}
-          storage_instance = read_or_create_storage_instance(session_id)
-          return storage_instance.{{name.id}}(k)
+          load_into_cache(session_id)
+          return @cache.{{name.id}}(k)
         end    
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?
-          storage_instance = read_or_create_storage_instance(session_id)
-          return storage_instance.{{name.id}}?(k)
+          load_into_cache(session_id)
+          return @cache.{{name.id}}?(k)
         end
 
         def {{name.id}}(session_id : String, k : String, v : {{type}})
-          storage_instance = read_or_create_storage_instance(session_id)
-          storage_instance.{{name.id}}(k, v)
-          File.write(@sessions_dir + session_id + ".json", storage_instance.to_json)
+          load_into_cache(session_id)
+          @cache.{{name.id}}(k, v)
+          save_cache
         end
 
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-          storage_instance = read_or_create_storage_instance(session_id)
-          return storage_instance.{{name.id}}s
+          load_into_cache(session_id)
+          return @cache.{{name.id}}s
         end
       {% end %}
     end

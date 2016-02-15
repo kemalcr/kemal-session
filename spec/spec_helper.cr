@@ -17,9 +17,3 @@ def create_context(session_id : String)
   request = HTTP::Request.new("GET", "/" , headers)
   return HTTP::Server::Context.new(request, response)
 end
-
-Spec.before_each do
-  Session.config do |config|
-    sessions_dir = "./spec/assets/sessions"
-  end
-end

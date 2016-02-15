@@ -1,34 +1,33 @@
 class Session
   class Config
     INSTANCE = self.new
-    ENGINES  = ["filesystem"]
 
     @timeout      : Time::Span
     @gc_interval  : Time::Span
     @cookie_name  : String
-    property timeout, gc_interval, cookie_name
+    @engine       : Engine
+    property timeout, gc_interval, cookie_name, engine
 
-    @engine       : String
-    @sessions_dir : String
-    getter sessions_dir, engine
+    @engine_set = false
+    def engine_set?
+      @engine_set
+    end
+    def engine=(e : Engine)
+      @engine = e
+      @engine_set = true
+    end
 
     def initialize
       @timeout      = Time::Span.new(1, 0, 0)
       @gc_interval  = Time::Span.new(0, 4, 0)
       @cookie_name  = "kemal_sessid"
-      @engine       = "filesystem"
-      @sessions_dir = "./sessions/"
+      @engine       = DummyEngine.new({s: " "})
     end
 
-    def sessions_dir=(v : String) : String
-      raise ArgumentError.new("Session: Cannot write to directory #{v}") unless File.directory?(v) && File.writable?(v)
-      @sessions_dir = v
+    def set_default_engine
+      Session.config.engine = FileSystemEngine.new({sessions_dir: "./sessions/"})
     end
 
-    def engine=(v : String) : String
-      raise ArgumentError.new("Session: Unknown engine #{v}") unless ENGINES.includes? v
-      @engine = v
-    end
   end # Config
 
   def self.config

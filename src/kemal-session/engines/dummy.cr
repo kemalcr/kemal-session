@@ -8,6 +8,10 @@ class Session
 
         def {{name.id}}(session_id : String, k : String) : {{type}}
           puts "Session #{session_id}: Getting value #{k}"
+
+          # Basically a hack so the compiler doesn't complain only nil is returned
+          r = uninitialized {{type}} 
+          return r
         end    
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?

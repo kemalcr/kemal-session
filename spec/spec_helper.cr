@@ -1,4 +1,5 @@
 require "spec"
+require "kemal"
 require "../src/kemal-session"
 require "http"
 
@@ -17,3 +18,5 @@ def create_context(session_id : String)
   request = HTTP::Request.new("GET", "/" , headers)
   return HTTP::Server::Context.new(request, response)
 end
+
+Session.config.engine = Session::FileSystemEngine.new({sessions_dir: "./spec/assets/sessions/"})

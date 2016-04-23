@@ -39,7 +39,7 @@ class Session
   end
 
   def self.start(context) : Session
-    instance : Session
+    instance = uninitialized Session
     if(id = id_from_context(context))
       instance = restore_instance(id)
     else
@@ -51,7 +51,7 @@ class Session
   end
 
   def self.restore_instance(id : String) : Session
-    instance : Session
+    instance = uninitialized Session
     case Session.config.engine
     when "filesystem"
       instance = e_filesystem_restore_instance(id)

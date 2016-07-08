@@ -45,6 +45,7 @@ class Session
       # @TODO make options optional (default value for sessions_dir = ./sessions/, maybe add format option (json, yaml...))
       raise ArgumentError.new("FileSystemEngine: Mandatory option sessions_dir not set") unless options.has_key? :sessions_dir
       raise ArgumentError.new("FileSystemEngine: Cannot write to directory #{options[:sessions_dir]}") unless File.directory?(options[:sessions_dir]) && File.writable?(options[:sessions_dir])
+      @sessions_dir = uninitialized String
       @sessions_dir = options[:sessions_dir]
 
       @cache = StorageInstance.new

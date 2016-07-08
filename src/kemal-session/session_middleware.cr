@@ -5,7 +5,7 @@
 # end
 
 class HTTP::Server::Context
-  property! session
+  property! session : Session
 end
 
 class SessionHandler < HTTP::Handler

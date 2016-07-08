@@ -21,11 +21,11 @@ class Session
       @timeout      = Time::Span.new(1, 0, 0)
       @gc_interval  = Time::Span.new(0, 4, 0)
       @cookie_name  = "kemal_sessid"
-      @engine       = DummyEngine.new({s: " "})
+      @engine       = DummyEngine.new({:s => " "})
     end
 
     def set_default_engine
-      Session.config.engine = FileSystemEngine.new({sessions_dir: "./sessions/"})
+      Session.config.engine = FileSystemEngine.new({:sessions_dir => "./sessions/"})
     end
 
   end # Config

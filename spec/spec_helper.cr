@@ -19,4 +19,4 @@ def create_context(session_id : String)
   return HTTP::Server::Context.new(request, response)
 end
 
-Session.config.engine = Session::FileSystemEngine.new({sessions_dir: "./spec/assets/sessions/"})
+Session.config.engine = Session::FileSystemEngine.new({:sessions_dir => "./spec/assets/sessions/"})

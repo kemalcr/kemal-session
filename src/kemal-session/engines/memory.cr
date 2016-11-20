@@ -42,20 +42,12 @@ class Session
 
     def initialize(options : Hash(Symbol, String))
       @store = {} of String => StorageInstance
-      @gc_started = false
     end
 
     def run_gc
-      unless @gc_started
-        @gc_started = true
-        spawn do
-          loop do
-            before = (Time.now - Session.config.timeout.as(Time::Span)).epoch_ms
-            @store.delete_if { |id, entry| entry.last_access_at < before }
-            sleep Session.config.gc_interval
-          end
-        end
-      end
+      before = (Time.now - Session.config.timeout.as(Time::Span)).epoch_ms
+      @store.delete_if { |id, entry| entry.last_access_at < before }
+      sleep Session.config.gc_interval
     end
 
     # Delegating int(k,v), int?(k) etc. from Engine to StorageInstance

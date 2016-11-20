@@ -2,14 +2,6 @@ require "spec"
 require "../src/kemal-session"
 require "file_utils"
 
-Spec.before_each do
-  sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
-  Dir.foreach(sessions_path) do |file|
-    next if file == "."
-    File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
-  end
-end
-
 def create_context(session_id : String)
   response = HTTP::Server::Response.new(MemoryIO.new)
   headers = HTTP::Headers.new
@@ -26,4 +18,4 @@ def create_context(session_id : String)
   return HTTP::Server::Context.new(request, response)
 end
 
-Session.config.engine = Session::FileSystemEngine.new({:sessions_dir => "./spec/assets/sessions/"})
+Session.config.engine = Session::MemoryEngine.new

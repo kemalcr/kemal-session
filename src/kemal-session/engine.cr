@@ -1,7 +1,7 @@
 class Session
   macro abstract_engine(vars)
     abstract class Engine
-      abstract def initialize(options : Hash(Symbol, String))
+
       abstract def run_gc
 
       {% for name, type in vars %}

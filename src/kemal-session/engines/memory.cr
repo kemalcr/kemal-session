@@ -40,7 +40,7 @@ class Session
 
     @store : Hash(String, StorageInstance)
 
-    def initialize(options : Hash(Symbol, String))
+    def initialize
       @store = {} of String => StorageInstance
     end
 

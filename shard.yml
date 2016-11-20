@@ -4,7 +4,7 @@ version: 0.1.0
 authors:
   - Thyra <Thyra@users.noreply.github.com>
 
-dependencies:
+development_dependencies:
   kemal:
     github: sdogruyol/kemal
     branch: master

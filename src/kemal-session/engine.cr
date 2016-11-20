@@ -18,7 +18,7 @@ class Session
     # generate delegators for each type (Session -> Engine)
     {% for name, type in vars %}
 
-      def {{name.id}}(k : String) : {{type}}
+      def {{name.id}}(k : String) : {{type}}?
         Session.config.engine.{{name.id}}(@id, k)
       end
 
@@ -36,7 +36,6 @@ class Session
 
     {% end %}
   end
-  
-  abstract_engine({int: Int32, string: String, float: Float64, bool: Bool})
 
+  abstract_engine({int: Int32, string: String, float: Float64, bool: Bool})
 end

@@ -1,38 +1,19 @@
-require "crypto/md5"
-require "json"
+require "secure_random"
 
 class Session
-
   @id : String
 
-  def initialize(@id : String)
-  end
-
-  def self.start(context) : Session
-    # @TODO this is not really optimal, as it has to be checked at each session start
+  def initialize(context : HTTP::Server::Context)
     Session.config.set_default_engine unless Session.config.engine_set?
-
-    instance = new(id_from_context(context) || generate_id)
-    instance.update_context(context)
-    return instance
-  end
-
-  # @TODO make sure the id is unique
-  def self.generate_id
-    raw = ""
-    r = Random.new
-    8.times do
-      case r.rand(3)
-      when 0
-        raw += r.next_bool.to_s
-      when 1
-        raw += r.next_int.to_s
-      when 2
-        raw += r.next_float.to_s
-      when 3
-        raw += r.next_u32.to_s
-      end
+    id = context.request.cookies[Session.config.cookie_name]?.try &.value
+    if id && id.size == 32
+      # valid
+    else
+      # new or invalid
+      id = SecureRandom.hex
     end
-    Crypto::MD5.hex_digest(raw)
+
+    context.response.cookies << HTTP::Cookie.new(name: Session.config.cookie_name, value: id, expires: Time.now.to_utc + Session.config.timeout, http_only: true)
+    @id = id
   end
 end

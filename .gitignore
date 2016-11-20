@@ -3,6 +3,7 @@
 /sessions/
 /.crystal/
 /.shards/
+/spec/assets
 
 
 # Libraries don't need dependency lock

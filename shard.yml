@@ -2,7 +2,7 @@ name: kemal-session
 version: 0.1.0
 
 authors:
-  - Thyra <Thyra@users.noreply.github.com>
+  - Serdar Dogruyol <dogruyolserdar@gmail.com>
 
 development_dependencies:
   kemal:

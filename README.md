@@ -13,7 +13,6 @@ dependencies:
     branch: master
 ```
 
-
 ## Usage
 
 ### Basic Usage
@@ -85,6 +84,10 @@ You can also write your own engine if you like. Take a look at the [wiki page](h
 ### Roadmap
 - More data types, including arrays and possibly hashes
 - Manage sessions: Session.all, Session.remove(id), Session.get(id
+
+## Compatible Engines
+
+- [kemal-session-file](https://github.com/kemalcr/kemal-session-file): File system based persistent storage session engine.
 
 ### Thanks
 

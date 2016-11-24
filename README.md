@@ -84,4 +84,8 @@ You can also write your own engine if you like. Take a look at the [wiki page](h
 
 ### Roadmap
 - More data types, including arrays and possibly hashes
-- Manage sessions: Session.all, Session.remove(id), Session.get(id)...
+- Manage sessions: Session.all, Session.remove(id), Session.get(id
+
+### Thanks
+
+Special thanks to [Thyra](https://github.com/Thyra) for initial efforts.

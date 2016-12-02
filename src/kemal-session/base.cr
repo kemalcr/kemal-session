@@ -11,8 +11,7 @@ class Session
     id = context.request.cookies[Session.config.cookie_name]?.try &.value
     valid = false
     if id
-      t_id = URI.unescape(id)
-      parts = t_id.split("--")
+      parts = URI.unescape(id).split("--")
       if parts.size == 2
         new_val = self.class.sign_value(parts[0])
         id = parts[0]
@@ -20,7 +19,7 @@ class Session
       end
     end
 
-    if !valid || id.nil?
+    if id.nil? || !valid
       # new or invalid
       id = SecureRandom.hex
     end

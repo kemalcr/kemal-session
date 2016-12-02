@@ -15,15 +15,5 @@ class Session
 
     context.response.cookies << HTTP::Cookie.new(name: Session.config.cookie_name, value: id, expires: Time.now.to_utc + Session.config.timeout, http_only: true)
     @id = id
-    start_gc
-  end
-
-  def start_gc
-    spawn do
-      loop do
-        Session.config.engine.run_gc
-        sleep(Session.config.gc_interval.total_seconds)
-      end
-    end
   end
 end

@@ -65,6 +65,7 @@ Session.config.cookie_name = "foobar"
 | cookie_name | Name of the cookie that holds the session_id on the client | ```"kemal_sessid"``` |
 | engine | How are the sessions saved on the server? (see section below) | ```Session::FileSystemEngine.new({sessions_dir: "./sessions/"})``` |
 | gc_interval | In which interval should the garbage collector find and delete expired sessions from the server?  | ```Time::Span.new(0, 4, 0)``` (4 minutes)  |
+| secret_token | Used to sign the session ids before theyre saved in the cookie. *Strongly* encoraged to [create your own secret_token](#creating-a-new-secret_token) | "" |
 
 #### Setting the Engine
 The standard engine is the MemoryEngine 
@@ -75,6 +76,16 @@ The engine you use has a huge impact on performance and can enable you to share 
 Session.config.engine = Session::FileSystemEngine.new({sessions_dir: "/var/foobar/sessions/"})
 ```
 You can also write your own engine if you like. Take a look at the [wiki page](https://github.com/kemalcr/kemal-session/wiki/Creating-your-own-engine). If you think it might also be helpful for others just let me know about it and I will include it in a list of known engines or something.
+
+#### Creating a new `secret_token`
+
+```bash
+crystal eval 'require "secure_random"; puts SecureRandom.hex(64)'
+```
+
+Once this has been generated, it's very important that you keep this in a safe
+place. Environment variables tend to be a good place for that. If the
+`secret_token` is lost all of the sessions will get reset.
 
 ### Features already implemented
 - Storing of Int32, String, Float64 and Bool values

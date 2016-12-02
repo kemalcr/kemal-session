@@ -38,4 +38,5 @@ class Session
   end
 
   abstract_engine({int: Int32, string: String, float: Float64, bool: Bool})
+  GC.new
 end

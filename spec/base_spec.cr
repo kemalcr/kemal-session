@@ -3,18 +3,18 @@ require "./spec_helper"
 describe "Session" do
   describe ".start" do
     it "returns a Session instance" do
-      typeof(Session.new(create_context("foo"))).should eq Session
+      typeof(Session.new(create_context(SESSION_ID))).should eq Session
     end
   end
 
   describe ".int" do
     it "can save a value" do
-      session = Session.new(create_context("foo"))
+      session = Session.new(create_context(SESSION_ID))
       session.int("bar", 12)
     end
 
     it "can retrieve a saved value" do
-      session = Session.new(create_context("foo"))
+      session = Session.new(create_context(SESSION_ID))
       session.int("bar", 12)
       session.int("bar").should eq 12
     end
@@ -38,13 +38,13 @@ describe "Session" do
       context.response.cookies[name].value.should_not eq(tampered_session)
     end
 
-    it "should not use signed cookies if secret_token is not set" do
-      Session.config.secret_token = nil
-      context = create_context("foo")
+    it "should use signed cookies if secret_token is not set" do
+      Session.config.secret_token = ""
+      context = create_context(SESSION_ID)
       session = Session.new(context)
       name = Session.config.cookie_name
-      context.response.cookies[name].value.size.should eq(32)
-      context.response.cookies[name].value.includes?("--").should be_false
+      context.response.cookies[name].value.size.should eq(74)
+      context.response.cookies[name].value.includes?("--").should be_true
     end
   end
 end

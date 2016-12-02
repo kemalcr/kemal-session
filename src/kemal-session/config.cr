@@ -23,7 +23,7 @@ class Session
       @timeout = Time::Span.new(1, 0, 0)
       @gc_interval = Time::Span.new(0, 4, 0)
       @cookie_name = "kemal_sessid"
-      @engine = DummyEngine.new({:s => " "})
+      @engine = MemoryEngine.new
     end
 
     def set_default_engine

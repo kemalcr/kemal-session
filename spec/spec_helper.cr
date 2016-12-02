@@ -3,7 +3,7 @@ require "../src/kemal-session"
 require "file_utils"
 
 SESSION_SECRET = "b3c631c314c0bbca50c1b2843150fe33"
-SESSION_ID = SecureRandom.hex
+SESSION_ID     = SecureRandom.hex
 SIGNED_SESSION = "#{SESSION_ID}--#{Session.sign_value(SESSION_ID, SESSION_SECRET)}"
 
 def create_context(session_id : String)
@@ -23,3 +23,4 @@ def create_context(session_id : String)
 end
 
 Session.config.engine = Session::MemoryEngine.new
+Session.config.secret = "kemal_rocks"

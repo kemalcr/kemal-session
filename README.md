@@ -51,12 +51,15 @@ The Session can be configured in the same way as Kemal itself:
 ```crystal
 Session.config do |config|
   config.cookie_name = "session_id"
-  config.gc_interval = Time::Span.new(0, 1, 0)
+  config.secret = "some_secret"
+  config.gc_interval = Time::Span.new(0, 1, 0) # 1 minutes
 end
 ```
 or
 ```crystal
-Session.config.cookie_name = "foobar"
+Session.config.cookie_name = "session_id"
+Session.config.secret = "some_secret"
+Session.config.gc_interval = Time::Span.new(0, 1, 0) # 1 minutes
 ```
 
 | Option  | explanation | default |
@@ -65,7 +68,7 @@ Session.config.cookie_name = "foobar"
 | cookie_name | Name of the cookie that holds the session_id on the client | ```"kemal_sessid"``` |
 | engine | How are the sessions saved on the server? (see section below) | ```Session::FileSystemEngine.new({sessions_dir: "./sessions/"})``` |
 | gc_interval | In which interval should the garbage collector find and delete expired sessions from the server?  | ```Time::Span.new(0, 4, 0)``` (4 minutes)  |
-| secret_token | Used to sign the session ids before theyre saved in the cookie. *Strongly* encoraged to [create your own secret_token](#creating-a-new-secret_token) | "" |
+| secret | Used to sign the session ids before theyre saved in the cookie. *Strongly* encouraged to [create your own secret](#creating-a-new-secret) | "" |
 
 #### Setting the Engine
 The standard engine is the MemoryEngine 
@@ -77,7 +80,7 @@ Session.config.engine = Session::FileSystemEngine.new({sessions_dir: "/var/fooba
 ```
 You can also write your own engine if you like. Take a look at the [wiki page](https://github.com/kemalcr/kemal-session/wiki/Creating-your-own-engine). If you think it might also be helpful for others just let me know about it and I will include it in a list of known engines or something.
 
-#### Creating a new `secret_token`
+#### Creating a new `secret`
 
 ```bash
 crystal eval 'require "secure_random"; puts SecureRandom.hex(64)'
@@ -85,7 +88,7 @@ crystal eval 'require "secure_random"; puts SecureRandom.hex(64)'
 
 Once this has been generated, it's very important that you keep this in a safe
 place. Environment variables tend to be a good place for that. If the
-`secret_token` is lost all of the sessions will get reset.
+`secret` is lost all of the sessions will get reset.
 
 ### Features already implemented
 - Storing of Int32, String, Float64 and Bool values
@@ -94,7 +97,7 @@ place. Environment variables tend to be a good place for that. If the
 
 ### Roadmap
 - More data types, including arrays and possibly hashes
-- Manage sessions: Session.all, Session.remove(id), Session.get(id
+- Manage sessions: Session.all, Session.remove(id), Session.get(id)
 
 ## Compatible Engines
 

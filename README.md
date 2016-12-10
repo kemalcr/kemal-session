@@ -102,6 +102,7 @@ place. Environment variables tend to be a good place for that. If the
 ## Compatible Engines
 
 - [kemal-session-file](https://github.com/kemalcr/kemal-session-file): File system based persistent storage session engine.
+- [kemal-session-redis](https://github.com/neovintage/kemal-session-redis): Redis based session storage engine.
 
 ### Thanks
 

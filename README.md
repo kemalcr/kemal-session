@@ -52,14 +52,14 @@ The Session can be configured in the same way as Kemal itself:
 Session.config do |config|
   config.cookie_name = "session_id"
   config.secret = "some_secret"
-  config.gc_interval = Time::Span.new(0, 1, 0) # 1 minutes
+  config.gc_interval = 2.minutes # 2 minutes
 end
 ```
 or
 ```crystal
 Session.config.cookie_name = "session_id"
 Session.config.secret = "some_secret"
-Session.config.gc_interval = Time::Span.new(0, 1, 0) # 1 minutes
+Session.config.gc_interval = 2.minutes # 2 minutes
 ```
 
 | Option  | explanation | default |

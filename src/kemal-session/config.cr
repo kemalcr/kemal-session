@@ -21,8 +21,8 @@ class Session
     end
 
     def initialize
-      @timeout = Time::Span.new(1, 0, 0)
-      @gc_interval = Time::Span.new(0, 4, 0)
+      @timeout = 1.hours
+      @gc_interval = 4.minutes
       @cookie_name = "kemal_sessid"
       @engine = MemoryEngine.new
       @secret = ""

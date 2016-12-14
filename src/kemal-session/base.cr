@@ -5,10 +5,11 @@ require "openssl/sha1"
 
 class Session
   @id : String
+  @context : HTTP::Server::Context
 
-  def initialize(context : HTTP::Server::Context)
+  def initialize(@context : HTTP::Server::Context)
     Session.config.set_default_engine unless Session.config.engine_set?
-    id = context.request.cookies[Session.config.cookie_name]?.try &.value
+    id = @context.request.cookies[Session.config.cookie_name]?.try &.value
     valid = false
     if id
       parts = URI.unescape(id).split("--")
@@ -24,12 +25,12 @@ class Session
       id = SecureRandom.hex
     end
 
-    context.response.cookies << HTTP::Cookie.new(
-                                  name: Session.config.cookie_name,
-                                  value: self.class.encode(id),
-                                  expires: Time.now.to_utc + Session.config.timeout,
-                                  http_only: true
-                                )
+    @context.response.cookies << HTTP::Cookie.new(
+                                   name: Session.config.cookie_name,
+                                   value: self.class.encode(id),
+                                   expires: Time.now.to_utc + Session.config.timeout,
+                                   http_only: true
+                                 )
     @id = id
   end
 
@@ -38,6 +39,16 @@ class Session
   def self.remove(id : String)
     session = Session.new(id)
     session.remove
+  end
+
+  # Invalidates the session by removing it from storage so that its
+  # no longer tracked
+  #
+  def remove
+    if @context.response.cookies.has_key?(Session.config.cookie_name)
+      @context.response.cookies[Session.config.cookie_name].value = ""
+    end
+    Session.config.engine.remove(@id)
   end
 
   # :nodoc:

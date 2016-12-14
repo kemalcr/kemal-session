@@ -20,11 +20,13 @@ describe "Session" do
     end
   end
 
-  describe "#remove" do
-    it "should delete a session" do
-      session = Session.new(create_context(SESSION_ID))
+  describe ".remove" do
+    it "should delete a session and remove cookie" do
+      context = create_context(SESSION_ID)
+      session = Session.new(context)
       session.int("user_id", 123)
       session.remove
+      context.response.cookies[Session.config.cookie_name].value.should eq("")
       new_session = Session.new(create_context(SESSION_ID))
       new_session.int?("user_id").should be_nil
     end

@@ -33,6 +33,13 @@ class Session
     @id = id
   end
 
+  # Removes a session from storage
+  #
+  def self.remove(id : String)
+    session = Session.new(id)
+    session.remove
+  end
+
   # :nodoc:
   # id is the session_id that were signing.
   def self.sign_value(id : String, secret = Session.config.secret_token)

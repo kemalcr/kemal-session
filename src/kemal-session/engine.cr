@@ -3,6 +3,7 @@ class Session
     abstract class Engine
 
       abstract def run_gc
+      abstract def remove(session_id : String)
 
       {% for name, type in vars %}
 
@@ -35,6 +36,13 @@ class Session
       end
 
     {% end %}
+
+    # Invalidates the session by removing it from storage so that its
+    # no longer tracked
+    #
+    def remove
+      Session.config.engine.remove(@id)
+    end
   end
 
   abstract_engine({int: Int32, string: String, float: Float64, bool: Bool})

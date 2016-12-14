@@ -20,6 +20,16 @@ describe "Session" do
     end
   end
 
+  describe "#remove" do
+    it "should delete a session" do
+      session = Session.new(create_context(SESSION_ID))
+      session.int("user_id", 123)
+      session.remove
+      new_session = Session.new(create_context(SESSION_ID))
+      new_session.int?("user_id").should be_nil
+    end
+  end
+
   describe "signed cookies" do
     it "should use the same session_id" do
       Session.config.secret_token = SESSION_SECRET

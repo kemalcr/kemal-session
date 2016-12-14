@@ -50,6 +50,14 @@ class Session
       sleep Session.config.gc_interval
     end
 
+    # Removes session from being tracked
+    #
+    def remove(session_id : String)
+      if @store[session_id]?
+        @store.delete(session_id)
+      end
+    end
+
     # Delegating int(k,v), int?(k) etc. from Engine to StorageInstance
     macro define_delegators(vars)
       {% for name, type in vars %}

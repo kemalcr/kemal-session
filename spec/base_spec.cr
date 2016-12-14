@@ -34,14 +34,14 @@ describe "Session" do
 
   describe "signed cookies" do
     it "should use the same session_id" do
-      Session.config.secret_token = SESSION_SECRET
+      Session.config.secret = SESSION_SECRET
       context = create_context(SIGNED_SESSION)
       session = Session.new(context)
       context.response.cookies[Session.config.cookie_name].value.should eq(SIGNED_SESSION)
     end
 
     it "should return a new session if signed token has been tampered" do
-      Session.config.secret_token = SESSION_SECRET
+      Session.config.secret = SESSION_SECRET
       tampered_session = "123" + SIGNED_SESSION[3..-1]
       context = create_context(tampered_session)
       session = Session.new(context)
@@ -50,13 +50,12 @@ describe "Session" do
       context.response.cookies[name].value.should_not eq(tampered_session)
     end
 
-    it "should use signed cookies if secret_token is not set" do
-      Session.config.secret_token = ""
+    it "should raise SecretRequiredException if secret is not set" do
+      Session.config.secret = ""
       context = create_context(SESSION_ID)
-      session = Session.new(context)
-      name = Session.config.cookie_name
-      context.response.cookies[name].value.size.should eq(74)
-      context.response.cookies[name].value.includes?("--").should be_true
+      expect_raises("Session::SecretRequiredException") do
+        session = Session.new(context)
+      end
     end
   end
 end

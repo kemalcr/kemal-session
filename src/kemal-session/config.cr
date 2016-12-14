@@ -6,8 +6,8 @@ class Session
     @gc_interval : Time::Span
     @cookie_name : String
     @engine : Engine
-    @secret_token : String
-    property timeout, gc_interval, cookie_name, engine, secret_token
+    @secret : String
+    property timeout, gc_interval, cookie_name, engine, secret
 
     @engine_set = false
 
@@ -21,11 +21,11 @@ class Session
     end
 
     def initialize
-      @timeout = Time::Span.new(1, 0, 0)
-      @gc_interval = Time::Span.new(0, 4, 0)
+      @timeout = 1.hours
+      @gc_interval = 4.minutes
       @cookie_name = "kemal_sessid"
       @engine = MemoryEngine.new
-      @secret_token = ""
+      @secret = ""
     end
 
     def set_default_engine

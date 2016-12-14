@@ -27,7 +27,8 @@ class Session
       name: Session.config.cookie_name,
       value: self.class.encode(id),
       expires: Time.now.to_utc + Session.config.timeout,
-      http_only: true
+      http_only: true,
+      secure: Session.config.secure
     )
     @id = id
   end
@@ -49,12 +50,12 @@ class Session
               Please set your session secret within your config via
 
               Session.config do |config|
-                Session.config.secret = \"my_super_secret\" 
+                Session.config.secret = \"my_super_secret\"
               end
 
               or
 
-              Session.config.secret = \"my_super_secret\" 
+              Session.config.secret = \"my_super_secret\"
               ERROR
       super error_message
     end

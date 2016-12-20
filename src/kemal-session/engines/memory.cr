@@ -50,9 +50,25 @@ class Session
       sleep Session.config.gc_interval
     end
 
+    def all
+      @store.each_with_object do ||
+        Session.new(id)
+      end
+    end
+
+    def each(&block)
+      @store.each do |id|
+        yield Session.new(id)
+      end
+    end
+
+    def get(session_id : String)
+      Session.new(@store[session_id])
+    end
+
     # Removes session from being tracked
     #
-    def remove(session_id : String)
+    def destroy(session_id : String)
       if @store[session_id]?
         @store.delete(session_id)
       end

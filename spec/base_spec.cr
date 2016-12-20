@@ -25,7 +25,7 @@ describe "Session" do
       context = create_context(SESSION_ID)
       session = Session.new(context)
       session.int("user_id", 123)
-      session.remove
+      session.destroy
       context.response.cookies[Session.config.cookie_name].value.should eq("")
       new_session = Session.new(create_context(SESSION_ID))
       new_session.int?("user_id").should be_nil

@@ -51,18 +51,19 @@ class Session
     end
 
     def all
-      @store.each_with_object do ||
-        Session.new(id)
+      @store.each_with_object([] of Session) do |vals, arr|
+        arr << Session.new(vals.first)
       end
     end
 
-    def each(&block)
-      @store.each do |id|
-        yield Session.new(id)
+    def each
+      @store.each do |key, val|
+        yield Session.new(key)
       end
     end
 
     def get(session_id : String)
+      return nil if !@store[session_id]?
       Session.new(@store[session_id])
     end
 

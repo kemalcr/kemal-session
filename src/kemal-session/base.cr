@@ -35,7 +35,7 @@ class Session
   end
 
   # When initializing a Session with a string, it's disassociated
-  # with an active request and response being handled by kemal. A 
+  # with an active request and response being handled by kemal. A
   # dummy Context is created and Session skips the validation
   # check on the session_id
   #
@@ -66,7 +66,7 @@ class Session
     Session.destroy(@id)
   end
 
-  # Retrieves all sessions from session storage as an Array.  
+  # Retrieves all sessions from session storage as an Array.
   # This will return all sessions in storage and could result
   # in a lot of memory usage. Use with caution. If something more
   # memory efficient is needed, use `Session.each`
@@ -75,7 +75,10 @@ class Session
     Session.config.engine.all
   end
 
-  # Enumerates through each session stored
+  # Enumerates through each session stored. Please read carefully
+  # each storage engine with regard to how this method is implemented
+  # some may dump all sessions in memory before iterating through
+  # them.
   #
   def self.each
     Session.config.engine.each do |session|

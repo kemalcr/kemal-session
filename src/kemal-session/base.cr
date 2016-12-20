@@ -34,21 +34,59 @@ class Session
     @id = id
   end
 
+  # When initializing a Session with a string, it's disassociated
+  # with an active request and response being handled by kemal. A 
+  # dummy Context is created and Session skips the validation
+  # check on the session_id
+  #
+  def initialize(id : String)
+    @id = id
+
+    response = HTTP::Server::Response.new(IO::Memory.new)
+    headers = HTTP::Headers.new
+    request = HTTP::Request.new("GET", "/", headers)
+    @context = HTTP::Server::Context.new(request, response)
+  end
+
   # Removes a session from storage
   #
-  def self.remove(id : String)
-    session = Session.new(id)
-    session.remove
+  def self.destroy(id : String)
+    Session.config.engine.destroy(id)
   end
 
   # Invalidates the session by removing it from storage so that its
-  # no longer tracked
+  # no longer tracked. If the session is being destroyed in the
+  # context of an active request being processed by kemal, the session
+  # cookie will be emptied.
   #
-  def remove
+  def destroy
     if @context.response.cookies.has_key?(Session.config.cookie_name)
       @context.response.cookies[Session.config.cookie_name].value = ""
     end
-    Session.config.engine.remove(@id)
+    Session.destroy(@id)
+  end
+
+  # Retrieves all sessions from session storage as an Array.  
+  # This will return all sessions in storage and could result
+  # in a lot of memory usage. Use with caution. If something more
+  # memory efficient is needed, use `Session.each`
+  #
+  def self.all
+    Session.config.engine.all
+  end
+
+  # Enumerates through each session stored
+  #
+  def self.each
+    Session.config.engine.each do |session|
+      yield session
+    end
+  end
+
+  # Retrieves a single session
+  #
+  def self.get(id : String)
+    Session.config.engine.get(id)
   end
 
   # :nodoc:

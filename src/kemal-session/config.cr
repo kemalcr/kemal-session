@@ -7,7 +7,8 @@ class Session
     @cookie_name : String
     @engine : Engine
     @secret : String
-    property timeout, gc_interval, cookie_name, engine, secret
+    @secure : Bool
+    property timeout, gc_interval, cookie_name, engine, secret, secure
 
     @engine_set = false
 
@@ -26,6 +27,7 @@ class Session
       @cookie_name = "kemal_sessid"
       @engine = MemoryEngine.new
       @secret = ""
+      @secure = false
     end
 
     def set_default_engine

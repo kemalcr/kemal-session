@@ -28,7 +28,8 @@ class Session
       name: Session.config.cookie_name,
       value: self.class.encode(id),
       expires: Time.now.to_utc + Session.config.timeout,
-      http_only: true
+      http_only: true,
+      secure: Session.config.secure
     )
     @id = id
   end

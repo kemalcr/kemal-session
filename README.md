@@ -69,6 +69,7 @@ Session.config.gc_interval = 2.minutes # 2 minutes
 | engine | How are the sessions saved on the server? (see section below) | ```Session::FileSystemEngine.new({sessions_dir: "./sessions/"})``` |
 | gc_interval | In which interval should the garbage collector find and delete expired sessions from the server?  | ```Time::Span.new(0, 4, 0)``` (4 minutes)  |
 | secret | Used to sign the session ids before theyre saved in the cookie. *Strongly* encouraged to [create your own secret](#creating-a-new-secret) | "" |
+| secure | The cookie used for session management should only be transmitted over encrypted connections. | false |
 
 #### Setting the Engine
 The standard engine is the MemoryEngine 

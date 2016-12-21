@@ -24,7 +24,7 @@ class Session
 
     if id.nil? || !valid
       id = SecureRandom.hex
-      Session.config.engine.build(id)
+      Session.config.engine.create_session(id)
     end
 
     @context.response.cookies << HTTP::Cookie.new(
@@ -54,7 +54,7 @@ class Session
   # Removes a session from storage
   #
   def self.destroy(id : String)
-    Session.config.engine.destroy(id)
+    Session.config.engine.destroy_session(id)
   end
 
   # Invalidates the session by removing it from storage so that its
@@ -72,7 +72,7 @@ class Session
   # Destroys all of the sessions stored in the storage engine
   #
   def self.destroy_all
-    Session.config.engine.destroy_all
+    Session.config.engine.destroy_all_sessions
   end
 
   # Retrieves all sessions from session storage as an Array.
@@ -81,7 +81,7 @@ class Session
   # memory efficient is needed, use `Session.each`
   #
   def self.all
-    Session.config.engine.all
+    Session.config.engine.all_sessions
   end
 
   # Enumerates through each session stored. Please read carefully
@@ -90,7 +90,7 @@ class Session
   # them.
   #
   def self.each
-    Session.config.engine.each do |session|
+    Session.config.engine.each_session do |session|
       yield session
     end
   end
@@ -98,7 +98,7 @@ class Session
   # Retrieves a single session
   #
   def self.get(id : String)
-    Session.config.engine.get(id)
+    Session.config.engine.get_session(id)
   end
 
   # :nodoc:

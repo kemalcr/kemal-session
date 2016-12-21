@@ -20,7 +20,7 @@ def create_context(session_id : String)
   # I would rather pass nil if no cookie should be created
   # but that throws an error
   unless session_id == ""
-    Session.config.engine.build(session_id)
+    Session.config.engine.create_session(session_id)
 
     cookies = HTTP::Cookies.new
     cookies << HTTP::Cookie.new(Session.config.cookie_name, Session.encode(session_id))

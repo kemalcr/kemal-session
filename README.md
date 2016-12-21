@@ -1,5 +1,7 @@
 # kemal-session
 
+[![Build Status](https://travis-ci.org/kemalcr/kemal-session.svg?branch=master)](https://travis-ci.org/kemalcr/kemal-session)
+
 Session support for [Kemal](https://github.com/sdogruyol/kemal) :rocket:
 
 ## Installation

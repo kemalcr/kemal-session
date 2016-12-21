@@ -4,6 +4,8 @@ require "openssl/hmac"
 require "openssl/sha1"
 
 class Session
+  getter id
+
   @id : String
   @context : HTTP::Server::Context
 

@@ -7,11 +7,11 @@ class Session
   getter id
 
   @id : String
-  @context : HTTP::Server::Context
+  @context : HTTP::Server::Context?
 
-  def initialize(@context : HTTP::Server::Context)
+  def initialize(ctx : HTTP::Server::Context)
     Session.config.set_default_engine unless Session.config.engine_set?
-    id = @context.request.cookies[Session.config.cookie_name]?.try &.value
+    id = ctx.request.cookies[Session.config.cookie_name]?.try &.value
     valid = false
     if id
       parts = URI.unescape(id).split("--")
@@ -27,14 +27,15 @@ class Session
       Session.config.engine.create_session(id)
     end
 
-    @context.response.cookies << HTTP::Cookie.new(
+    ctx.response.cookies << HTTP::Cookie.new(
       name: Session.config.cookie_name,
       value: self.class.encode(id),
       expires: Time.now.to_utc + Session.config.timeout,
       http_only: true,
       secure: Session.config.secure
     )
-    @id = id
+    @id      = id
+    @context = ctx.as(HTTP::Server::Context)
   end
 
   # When initializing a Session with a string, it's disassociated
@@ -43,12 +44,8 @@ class Session
   # check on the session_id
   #
   def initialize(id : String)
-    @id = id
-
-    response = HTTP::Server::Response.new(IO::Memory.new)
-    headers = HTTP::Headers.new
-    request = HTTP::Request.new("GET", "/", headers)
-    @context = HTTP::Server::Context.new(request, response)
+    @id      = id
+    @context = nil
   end
 
   # Removes a session from storage
@@ -63,8 +60,8 @@ class Session
   # cookie will be emptied.
   #
   def destroy
-    if @context.response.cookies.has_key?(Session.config.cookie_name)
-      @context.response.cookies[Session.config.cookie_name].value = ""
+    if !@context.nil? && @context.as(HTTP::Server::Context).response.cookies.has_key?(Session.config.cookie_name)
+      @context.as(HTTP::Server::Context).response.cookies[Session.config.cookie_name].value = ""
     end
     Session.destroy(@id)
   end

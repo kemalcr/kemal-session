@@ -30,6 +30,16 @@ describe "Session" do
       new_session = Session.new(create_context(SESSION_ID))
       new_session.int?("user_id").should be_nil
     end
+
+    it "should delete a session even if context doesnt exist" do
+      create_context(SESSION_ID)
+      session = Session.get(SESSION_ID)
+      session.should_not be_nil
+      if session
+        session.destroy
+        Session.get(SESSION_ID).should be_nil
+      end
+    end
   end
 
   describe "#destroy" do

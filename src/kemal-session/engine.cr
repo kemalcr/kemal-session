@@ -4,9 +4,11 @@ class Session
 
       abstract def run_gc
       abstract def all : Array(Session)
+      abstract def build(session_id : String)
       abstract def each(&block : Session -> _)
       abstract def get(session_id : String) : Session?
       abstract def destroy(session_id : String)
+      abstract def destroy_all
 
       {% for name, type in vars %}
 

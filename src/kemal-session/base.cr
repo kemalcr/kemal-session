@@ -24,6 +24,7 @@ class Session
 
     if id.nil? || !valid
       id = SecureRandom.hex
+      Session.config.engine.build(id)
     end
 
     @context.response.cookies << HTTP::Cookie.new(
@@ -66,6 +67,12 @@ class Session
       @context.response.cookies[Session.config.cookie_name].value = ""
     end
     Session.destroy(@id)
+  end
+
+  # Destroys all of the sessions stored in the storage engine
+  #
+  def self.destroy_all
+    Session.config.engine.destroy_all
   end
 
   # Retrieves all sessions from session storage as an Array.

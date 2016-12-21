@@ -56,6 +56,10 @@ class Session
       end
     end
 
+    def build(session_id : String)
+      @store[session_id] = StorageInstance.new(session_id)
+    end
+
     def each
       @store.each do |key, val|
         yield Session.new(key)
@@ -63,8 +67,8 @@ class Session
     end
 
     def get(session_id : String)
-      return nil if !@store[session_id]?
-      Session.new(@store[session_id])
+      return nil if !@store.has_key?(session_id)
+      Session.new(session_id)
     end
 
     # Removes session from being tracked
@@ -73,6 +77,10 @@ class Session
       if @store[session_id]?
         @store.delete(session_id)
       end
+    end
+
+    def destroy_all
+      @store.clear
     end
 
     # Delegating int(k,v), int?(k) etc. from Engine to StorageInstance

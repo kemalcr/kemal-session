@@ -3,6 +3,12 @@ class Session
     abstract class Engine
 
       abstract def run_gc
+      abstract def all_sessions : Array(Session)
+      abstract def create_session(session_id : String)
+      abstract def each_session(&block : Session -> _)
+      abstract def get_session(session_id : String) : Session?
+      abstract def destroy_session(session_id : String)
+      abstract def destroy_all_sessions
 
       {% for name, type in vars %}
 

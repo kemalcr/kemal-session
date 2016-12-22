@@ -50,6 +50,39 @@ class Session
       sleep Session.config.gc_interval
     end
 
+    def all_sessions
+      @store.each_with_object([] of Session) do |vals, arr|
+        arr << Session.new(vals.first)
+      end
+    end
+
+    def create_session(session_id : String)
+      @store[session_id] = StorageInstance.new(session_id)
+    end
+
+    def each_session
+      @store.each do |key, val|
+        yield Session.new(key)
+      end
+    end
+
+    def get_session(session_id : String)
+      return nil if !@store.has_key?(session_id)
+      Session.new(session_id)
+    end
+
+    # Removes session from being tracked
+    #
+    def destroy_session(session_id : String)
+      if @store[session_id]?
+        @store.delete(session_id)
+      end
+    end
+
+    def destroy_all_sessions
+      @store.clear
+    end
+
     # Delegating int(k,v), int?(k) etc. from Engine to StorageInstance
     macro define_delegators(vars)
       {% for name, type in vars %}

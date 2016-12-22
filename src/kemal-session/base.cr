@@ -4,11 +4,14 @@ require "openssl/hmac"
 require "openssl/sha1"
 
 class Session
-  @id : String
+  getter id
 
-  def initialize(context : HTTP::Server::Context)
+  @id : String
+  @context : HTTP::Server::Context?
+
+  def initialize(ctx : HTTP::Server::Context)
     Session.config.set_default_engine unless Session.config.engine_set?
-    id = context.request.cookies[Session.config.cookie_name]?.try &.value
+    id = ctx.request.cookies[Session.config.cookie_name]?.try &.value
     valid = false
     if id
       parts = URI.unescape(id).split("--")
@@ -21,16 +24,78 @@ class Session
 
     if id.nil? || !valid
       id = SecureRandom.hex
+      Session.config.engine.create_session(id)
     end
 
-    context.response.cookies << HTTP::Cookie.new(
+    ctx.response.cookies << HTTP::Cookie.new(
       name: Session.config.cookie_name,
       value: self.class.encode(id),
       expires: Time.now.to_utc + Session.config.timeout,
       http_only: true,
       secure: Session.config.secure
     )
-    @id = id
+    @id      = id
+    @context = ctx.as(HTTP::Server::Context)
+  end
+
+  # When initializing a Session with a string, it's disassociated
+  # with an active request and response being handled by kemal. A
+  # dummy Context is created and Session skips the validation
+  # check on the session_id
+  #
+  def initialize(id : String)
+    @id      = id
+    @context = nil
+  end
+
+  # Removes a session from storage
+  #
+  def self.destroy(id : String)
+    Session.config.engine.destroy_session(id)
+  end
+
+  # Invalidates the session by removing it from storage so that its
+  # no longer tracked. If the session is being destroyed in the
+  # context of an active request being processed by kemal, the session
+  # cookie will be emptied.
+  #
+  def destroy
+    if !@context.nil? && @context.as(HTTP::Server::Context).response.cookies.has_key?(Session.config.cookie_name)
+      @context.as(HTTP::Server::Context).response.cookies[Session.config.cookie_name].value = ""
+    end
+    Session.destroy(@id)
+  end
+
+  # Destroys all of the sessions stored in the storage engine
+  #
+  def self.destroy_all
+    Session.config.engine.destroy_all_sessions
+  end
+
+  # Retrieves all sessions from session storage as an Array.
+  # This will return all sessions in storage and could result
+  # in a lot of memory usage. Use with caution. If something more
+  # memory efficient is needed, use `Session.each`
+  #
+  def self.all
+    Session.config.engine.all_sessions
+  end
+
+  # Enumerates through each session stored. Please read carefully
+  # each storage engine with regard to how this method is implemented
+  # some may dump all sessions in memory before iterating through
+  # them.
+  #
+  def self.each
+    Session.config.engine.each_session do |session|
+      yield session
+    end
+  end
+
+  # Retrieves a single session
+  #
+  def self.get(id : String)
+    Session.config.engine.get_session(id)
   end
 
   # :nodoc:

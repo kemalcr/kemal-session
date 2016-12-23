@@ -35,7 +35,7 @@ class Session
       secure: Session.config.secure
     )
     @id      = id
-    @context = ctx.as(HTTP::Server::Context)
+    @context = ctx
   end
 
   # When initializing a Session with a string, it's disassociated
@@ -60,8 +60,8 @@ class Session
   # cookie will be emptied.
   #
   def destroy
-    if !@context.nil? && @context.as(HTTP::Server::Context).response.cookies.has_key?(Session.config.cookie_name)
-      @context.as(HTTP::Server::Context).response.cookies[Session.config.cookie_name].value = ""
+    if context = @context 
+      context.response.cookies[Session.config.cookie_name].value = ""
     end
     Session.destroy(@id)
   end

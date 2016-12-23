@@ -93,14 +93,32 @@ Once this has been generated, it's very important that you keep this in a safe
 place. Environment variables tend to be a good place for that. If the
 `secret` is lost all of the sessions will get reset.
 
-### Features already implemented
+### Logout and managing sessions
+If you want to log a user out, simply call `destroy` on the session object:
+```crystal
+get "/logout" do |env|
+  env.session.destroy
+  "You have been logged out."
+end
+```
+It is also possible to manage other users' sessions if you want to build an administrator's interface, for example:
+- `Session.get(session_id)` returns the session object identified by the given id
+- `Session.each { |session| … }` executes the given block on every session
+- `Session.all` returns an array containing all sessions
+- `Session.destroy(session_id)` destroys the session identified by the given id (logs the user out)
+- `Session.destroy_all` destroys all sessions (logs everyone out including you)
+
+**You should be very careful with those, though.** These functions enable you to access and modify all information that is stored in all sessions, also in those that do not belong to the current user. So take extra care of security when using them.
+Additionally, depending on the engine used and on how many active sessions there are, `Session.all` and `Session.each` might be memory intensive as they have to load all the sessions into memory at once, in the worst case. It is best to check/ask how your engine handles that when in doubt.
+
+## Features already implemented
 - Storing of Int32, String, Float64 and Bool values
 - Garbage collector that removes expired sessions from the server
 - Memory engine
-
-### Roadmap
-- More data types, including arrays and possibly hashes
 - Manage sessions: Session.all, Session.remove(id), Session.get(id)
+
+## Roadmap
+- More data types, including arrays and possibly hashes
 
 ## Compatible Engines
 
@@ -110,3 +128,4 @@ place. Environment variables tend to be a good place for that. If the
 ### Thanks
 
 Special thanks to [Thyra](https://github.com/Thyra) for initial efforts.
+

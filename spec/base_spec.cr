@@ -20,6 +20,24 @@ describe "Session" do
     end
   end
 
+  describe ".array" do
+    it "can save an array" do
+      session = Session.new(create_context(SESSION_ID))
+      session.array("all_the_things", [1, "asdf", 2.0, true])
+      session.array("all_the_things").should eq([1, "asdf", 2.0, true])
+    end
+
+    it "can save a mutated array" do
+      session = Session.new(create_context(SESSION_ID))
+      array = [1, 2, 3] of Session::SessionType
+      session.array("all_the_things", array)
+      session.array("all_the_things").should eq(array)
+      array << "awesome"
+      session.array("all_the_things", array)
+      session.array("all_the_things").should eq(array)
+    end
+  end
+
   describe ".destroy" do
     it "should delete a session and remove cookie in current session" do
       context = create_context(SESSION_ID)

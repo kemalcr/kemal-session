@@ -1,4 +1,7 @@
 class Session
+
+  alias SessionType = Int32 | String | Float64 | Bool
+
   macro abstract_engine(vars)
     abstract class Engine
 
@@ -43,6 +46,6 @@ class Session
     {% end %}
   end
 
-  abstract_engine({int: Int32, string: String, float: Float64, bool: Bool})
+  abstract_engine({int: Int32, string: String, float: Float64, bool: Bool, array: Array(SessionType)})
   GC.new
 end

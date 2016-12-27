@@ -1,4 +1,5 @@
 require "spec"
+require "json"
 require "../src/kemal-session"
 require "file_utils"
 
@@ -29,4 +30,32 @@ def create_context(session_id : String)
 
   request = HTTP::Request.new("GET", "/", headers)
   return HTTP::Server::Context.new(request, response)
+end
+
+class User < Session::StorableObject
+  JSON.mapping(
+    id: Int32,
+    name: String
+  )
+
+  def initialize(@id : Int32, @name : String)
+  end
+
+  def serialize
+    return self.to_json
+  end
+
+  def self.unserialize(str : String)
+    return self.from_json(str)
+  end
+end
+
+class BadUser < Session::StorableObject
+  property name
+
+  def initialize(@name : String); end
+
+  def serialize
+    return @name
+  end
 end

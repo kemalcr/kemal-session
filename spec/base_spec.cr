@@ -20,21 +20,33 @@ describe "Session" do
     end
   end
 
-  describe ".array" do
-    it "can save an array" do
+  describe ".object" do
+    it "can be saved" do
       session = Session.new(create_context(SESSION_ID))
-      session.array("all_the_things", [1, "asdf", 2.0, true])
-      session.array("all_the_things").should eq([1, "asdf", 2.0, true])
+      session.object("obj", User.new(1, "cool"))
+      user = session.object?("obj")
+      user.should_not be_nil
+      if user
+        user = user.as(User)
+        user.id.should eq(1)
+        user.name.should eq("cool")
+
+        user1 = User.unserialize("{ \"id\": 1, \"name\": \"cool\" }")
+        user1.id.should eq(1)
+        user1.name.should eq("cool")
+      end
     end
 
-    it "can save a mutated array" do
+    it "can return nil" do
       session = Session.new(create_context(SESSION_ID))
-      array = [1, 2, 3] of Session::SessionType
-      session.array("all_the_things", array)
-      session.array("all_the_things").should eq(array)
-      array << "awesome"
-      session.array("all_the_things", array)
-      session.array("all_the_things").should eq(array)
+      user = session.object?("obj")
+      user.should be_nil
+    end
+
+    it "will raise error if storable object is missing unserialize" do
+      expect_raises("Session::StorableObject::NotImplementedException") do
+        BadUser.unserialize("wow")
+      end
     end
   end
 

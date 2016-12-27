@@ -35,7 +35,7 @@ class Session
         end
       end
 
-      define_storage({int: Int32, string: String, float: Float64, bool: Bool, array: Array(SessionType)})
+      define_storage({int: Int32, string: String, float: Float64, bool: Bool, object: Session::StorableObject})
     end
 
     @store : Hash(String, StorageInstance)
@@ -108,6 +108,6 @@ class Session
       {% end %}
     end
 
-    define_delegators({int: Int32, string: String, float: Float64, bool: Bool, array: Array(SessionType)})
+    define_delegators({int: Int32, string: String, float: Float64, bool: Bool, object: Session::StorableObject})
   end
 end

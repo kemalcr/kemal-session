@@ -2,14 +2,9 @@ class Session
   abstract class StorableObject
     abstract def serialize : String
     def self.unserialize(obj : String) : self
-      raise NotImplementedException.new
+      raise NotImplementedException.new("StorableObject #{self} needs to define the 'self.unserialize' method")
     end
 
-    class NotImplementedException < Exception
-      def initialize
-        error_message = "StorableObject is missing unserialize definition"
-        super
-      end
-    end
+    class NotImplementedException < Exception; end
   end
 end

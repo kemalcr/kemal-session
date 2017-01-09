@@ -87,8 +87,8 @@ class Session
     macro define_delegators(vars)
       {% for name, type in vars %}
 
-        def {{name.id}}(session_id : String, k : String) : {{type}}?
-          return @store[session_id]?.try &.{{name.id}}(k)
+        def {{name.id}}(session_id : String, k : String) : {{type}}
+          return @store[session_id].{{name.id}}(k)
         end
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?

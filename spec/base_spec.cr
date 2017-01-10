@@ -41,6 +41,20 @@ describe "Session" do
     end
   end
 
+  describe ".bigint" do
+    it "can save a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bigint("bigbar", 12_i64)
+    end
+
+    it "can retrieve a saved value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bigint("bigbar", 12_i64)
+      session.bigint("bigbar").should eq 12
+      session.bigint("bigbar").is_a?(Int64).should be_true
+    end
+  end
+
   describe ".object" do
     it "can be saved" do
       session = Session.new(create_context(SESSION_ID))

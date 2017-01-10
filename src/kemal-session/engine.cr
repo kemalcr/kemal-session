@@ -43,6 +43,13 @@ class Session
     {% end %}
   end
 
-  abstract_engine({int: Int32, string: String, float: Float64, bool: Bool, object: Session::StorableObject})
+  abstract_engine({
+    int: Int32,
+    bigint: Int64,
+    string: String,
+    float: Float64,
+    bool: Bool,
+    object: Session::StorableObject
+  })
   GC.new
 end

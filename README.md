@@ -36,7 +36,20 @@ end
 
 Kemal.run
 ```
-The session can save Int32, String, Float64 and Bool values. Use ```session.int```, ```session.string```, ```session.float``` and ```session.bool``` for that.
+
+### Available Types
+
+The session can save many different types but the method names differ from the type.
+
+| Type | Access Method |
+|------|---------------|
+| Int32 | `session.int` |
+| Int64 | `session.bigint` |
+| String | `session.string` |
+| Float64 | `session.float` |
+| Bool    | `session.bool` |
+| StorableObject  | `session.object` |
+
 
 You can also access the underyling hash directly by appending ``s`` to the name: ``session.ints``. This way you can use hash functions like
 ```crystal
@@ -45,14 +58,14 @@ session.ints.each do |k, v|
 end
 ```
 
-**BUT:** This should only be used for reading and analyzing values, **never for changing them**. Because otherwise the session won't automatically save the changes and you may produce really weird bugs... 
+**BUT:** This should only be used for reading and analyzing values, **never for changing them**. Because otherwise the session won't automatically save the changes and you may produce really weird bugs...
 
-### StorableObject
+#### StorableObject
 
-`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Float64, String, Bool). 
-Any object that you want to save to session storage needs to be a subclass of `Session::StorableObject`. 
-The subclass needs to define two different methods. First, a class method to deserialize the object from a String, called `unserialize`. The 
-second method, is an instance method called `serialize`. `serialize` will take the object and turn it into a String for the session storage engine to 
+`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Float64, String, Bool).
+Any object that you want to save to session storage needs to be a subclass of `Session::StorableObject`.
+The subclass needs to define two different methods. First, a class method to deserialize the object from a String, called `unserialize`. The
+second method, is an instance method called `serialize`. `serialize` will take the object and turn it into a String for the session storage engine to
 handle. Here's an example implementation:
 
 ```crystal
@@ -72,7 +85,7 @@ class UserStorableObject < Session::StorableObject
 end
 ```
 
-Once a `StorableObject` subclass has been defined, you can save that in session storage just like the base types. Here's an example using 
+Once a `StorableObject` subclass has been defined, you can save that in session storage just like the base types. Here's an example using
 the `UserStorableObject` implementation:
 
 ```crystal
@@ -91,7 +104,7 @@ end
 ```
 
 Serialization is up to you. You can define how you want that to happen so long as the resulting type is a String. If you need recommendations
-or advice, check with the underlying session storage implementation. 
+or advice, check with the underlying session storage implementation.
 
 ### Configuration
 
@@ -120,8 +133,8 @@ Session.config.gc_interval = 2.minutes # 2 minutes
 | secure | The cookie used for session management should only be transmitted over encrypted connections. | ```false``` |
 
 #### Setting the Engine
-The standard engine is the MemoryEngine 
- 
+The standard engine is the MemoryEngine
+
 The engine you use has a huge impact on performance and can enable you to share sessions between different servers, make them available to any other application or whatever you can imagine. So the choice of engine is very important.
 
 ```crystal

@@ -18,6 +18,27 @@ describe "Session" do
       session.int("bar", 12)
       session.int("bar").should eq 12
     end
+
+    it "throws an exception if the key doesnt exist" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_raises(KeyError, /Missing hash key: "something"/) do
+        session.int("something")
+      end
+    end
+  end
+
+  describe ".int?" do
+    it "can return nil" do
+      session = Session.new(create_context(SESSION_ID))
+      val = session.int?("something")
+      val.should be_nil
+    end
+
+    it "can return a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.int("bar", 12)
+      session.int?("bar").is_a?(Int32).should be_true
+    end
   end
 
   describe ".object" do

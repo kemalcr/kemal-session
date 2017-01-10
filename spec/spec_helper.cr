@@ -42,11 +42,11 @@ class User < Session::StorableObject
   end
 
   def serialize
-    return self.to_json
+    return to_json
   end
 
   def self.unserialize(str : String)
-    return self.from_json(str)
+    return User.from_json(str)
   end
 end
 

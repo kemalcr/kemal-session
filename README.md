@@ -62,7 +62,7 @@ end
 
 #### StorableObject
 
-`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Float64, String, Bool).
+`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Int64, Float64, String, Bool).
 Any object that you want to save to session storage needs to be a subclass of `Session::StorableObject`.
 The subclass needs to define two different methods. First, a class method to deserialize the object from a String, called `unserialize`. The
 second method, is an instance method called `serialize`. `serialize` will take the object and turn it into a String for the session storage engine to
@@ -171,6 +171,7 @@ It is also possible to manage other users' sessions if you want to build an admi
 Additionally, depending on the engine used and on how many active sessions there are, `Session.all` and `Session.each` might be memory intensive as they have to load all the sessions into memory at once, in the worst case. It is best to check/ask how your engine handles that when in doubt.
 
 ## Features already implemented
+
 - Storing of Int32, String, Float64 and Bool values
 - Garbage collector that removes expired sessions from the server
 - Memory engine

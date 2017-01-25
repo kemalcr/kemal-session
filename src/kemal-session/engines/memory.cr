@@ -1,5 +1,6 @@
 require "../engine"
 
+# TODO Need to have last_accessed_at be available to the gc. which means it needs to be in the json
 class Session
   class MemoryEngine < Engine
     class StorageInstance
@@ -45,10 +46,10 @@ class Session
       })
     end
 
-    @store : Hash(String, StorageInstance)
+    @store : Hash(String, String)
 
     def initialize
-      @store = {} of String => StorageInstance
+      @store = {} of String => String
     end
 
     def run_gc
@@ -95,22 +96,30 @@ class Session
       {% for name, type in vars %}
 
         def {{name.id}}(session_id : String, k : String) : {{type}}
-          return @store[session_id].{{name.id}}(k)
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          return storage_instance.{{name.id}}(k)
         end
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?
-          return @store[session_id]?.try &.{{name.id}}?(k)
+          return nil if @store[session_id].nil?
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          return storage_instance.{{name.id}}?(k)
         end
 
         def {{name.id}}(session_id : String, k : String, v : {{type}})
-          store = @store[session_id]? || begin
-            @store[session_id] = StorageInstance.new(session_id)
+          if @store[session_id].nil?
+            storage_instance = StorageInstance.new(session_id)
+          else
+            storage_instance = StorageInstance.from_json(@store[session_id])
           end
-          store.{{name.id}}(k, v)
+          storage_instance.{{name.id}}(k, v)
+          @store[session_id] = storage_instance.to_json
         end
 
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-          return @store[session_id]?.try &.{{name.id}}s
+          return {} of String => {{ type }} if @store[session_id].nil?
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          return storage_instance.{{name.id}}s
         end
       {% end %}
     end

@@ -65,10 +65,6 @@ describe "Session" do
         user = user.as(User)
         user.id.should eq(1)
         user.name.should eq("cool")
-
-        user1 = User.unserialize("{ \"id\": 1, \"name\": \"cool\" }")
-        user1.id.should eq(1)
-        user1.name.should eq("cool")
       end
     end
 
@@ -78,11 +74,12 @@ describe "Session" do
       user.should be_nil
     end
 
-    it "will raise error if storable object is missing unserialize" do
-      expect_raises("Session::StorableObject::NotImplementedException") do
-        BadUser.unserialize("wow")
-      end
-    end
+    # TODO reimplement to check compiler errors
+    #it "will raise error if storable object is missing unserialize" do
+      #expect_raises("Session::StorableObject::NotImplementedException") do
+        #BadUser.unserialize("wow")
+      #end
+    #end
   end
 
   describe ".destroy" do

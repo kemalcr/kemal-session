@@ -1,10 +1,23 @@
 class Session
-  abstract class StorableObject
-    abstract def serialize : String
-    def self.unserialize(obj : String) : self
-      raise NotImplementedException.new("StorableObject #{self} needs to define the 'self.unserialize' method")
+  STORABLE_TYPES = [] of Nil
+
+  module StorableObject
+    macro included
+      {% Session::STORABLE_TYPES << @type %}
+
+      macro finished
+        {% if !@type.class.overrides?(Object, "from_json") %}
+          {{ raise("StorableObject #{@type} needs to define `from_json`") }}
+        {% end %}
+
+        {% if !@type.overrides?(Object, "to_json") %}
+          {{ raise("StorableObject #{@type} needs to define `to_json`") }}
+        {% end %}
+      end
     end
 
-    class NotImplementedException < Exception; end
+    macro finished
+      alias StorableObjects = Union({{ *Session::STORABLE_TYPES }})
+    end
   end
 end

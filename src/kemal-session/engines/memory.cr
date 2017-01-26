@@ -1,12 +1,19 @@
 require "../engine"
 
-# TODO Need to have last_accessed_at be available to the gc. which means it needs to be in the json
 class Session
   class MemoryEngine < Engine
     class StorageInstance
       macro define_storage(vars)
         getter! id : String
         property! last_access_at : Int64
+
+        JSON.mapping({
+          {% for name, type in vars %}
+            {{name.id}}s: Hash(String, {{type}}),
+          {% end %}
+          last_access_at: Int64,
+          id: String,
+        })
 
         {% for name, type in vars %}
           @{{name.id}}s = Hash(String, {{type}}).new
@@ -54,7 +61,10 @@ class Session
 
     def run_gc
       before = (Time.now - Session.config.timeout.as(Time::Span)).epoch_ms
-      @store.delete_if { |id, entry| entry.last_access_at < before }
+      @store.delete_if do |id, entry|
+        last_access_at = Int64.from_json(entry, root: "last_access_at")
+        last_access_at < before
+      end
       sleep Session.config.gc_interval
     end
 
@@ -65,7 +75,7 @@ class Session
     end
 
     def create_session(session_id : String)
-      @store[session_id] = StorageInstance.new(session_id)
+      @store[session_id] = StorageInstance.new(session_id).to_json
     end
 
     def each_session

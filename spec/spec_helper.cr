@@ -46,3 +46,31 @@ class User
   def initialize(@id : Int32, @name : String)
   end
 end
+
+class UserTestSerialization
+  def initialize(@id : Int64); end
+
+  def self.from_json(parser)
+    raise Exception.new("calling from_json")
+  end
+
+  def to_json(io)
+    raise Exception.new("calling to_json")
+  end
+
+  include Session::StorableObject
+end
+
+class UserTestDeserialization
+  def initialize(@id : Int64); end
+
+  def self.from_json(parser)
+    raise Exception.new("calling from_json")
+  end
+
+  def to_json(io)
+    @id.to_s io
+  end
+
+  include Session::StorableObject
+end

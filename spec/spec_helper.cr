@@ -54,7 +54,7 @@ class UserTestSerialization
     raise Exception.new("calling from_json")
   end
 
-  def to_json(io)
+  def to_json(json)
     raise Exception.new("calling to_json")
   end
 
@@ -68,8 +68,8 @@ class UserTestDeserialization
     raise Exception.new("calling from_json")
   end
 
-  def to_json(io)
-    @id.to_s io
+  def to_json(json : JSON::Builder)
+    json.number(@id)
   end
 
   include Session::StorableObject

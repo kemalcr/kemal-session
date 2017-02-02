@@ -68,6 +68,11 @@ class Session
       end
     end
 
+    def clear_cache
+      @cache = StorageInstance.new
+      @cached_session_id = ""
+    end
+
     def load_into_cache(session_id : String) : StorageInstance
       @cached_session_id = session_id
       return @cache = read_or_create_storage_instance(session_id)

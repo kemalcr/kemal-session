@@ -63,29 +63,23 @@ end
 #### StorableObject
 
 `kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Int64, Float64, String, Bool).
-Any object that you want to save to session storage needs to be a subclass of `Session::StorableObject`.
-The subclass needs to define two different methods. First, a class method to deserialize the object from a String, called `unserialize`. The
-second method, is an instance method called `serialize`. `serialize` will take the object and turn it into a String for the session storage engine to
-handle. Here's an example implementation:
+Any object that you want to save to session storage needs to include the `Session::StorableObject` module. The class must respond to `to_json` and `from_json`. **NOTE** The module must be included after the definition of `to_json` and `from_json`.
+Otherwise the compiler will not know that those methods have been defined on the class.
+Here's an example implementation:
 
 ```crystal
-class UserStorableObject < Session::StorableObject
-  property id, name
+class UserStorableObject
+  JSON.mapping({
+    id: Int32,
+    name: String
+  })
+  include Session::StorableObject
 
   def initialize(@id : Int32, @name : String); end
-
-  def serialize
-    return "#{@id};#{@name}"
-  end
-
-  def self.unserialize(value : String)
-    parts = value.split(";")
-    return self.new(parts[0].to_i, parts[1])
-  end
 end
 ```
 
-Once a `StorableObject` subclass has been defined, you can save that in session storage just like the base types. Here's an example using
+Once a `StorableObject` has been defined, you can save that in session storage just like the base types. Here's an example using
 the `UserStorableObject` implementation:
 
 ```crystal
@@ -176,9 +170,6 @@ Additionally, depending on the engine used and on how many active sessions there
 - Garbage collector that removes expired sessions from the server
 - Memory engine
 - Manage sessions: Session.all, Session.remove(id), Session.get(id)
-
-## Roadmap
-- More data types, including arrays and possibly hashes
 
 ## Compatible Engines
 

@@ -65,10 +65,6 @@ describe "Session" do
         user = user.as(User)
         user.id.should eq(1)
         user.name.should eq("cool")
-
-        user1 = User.unserialize("{ \"id\": 1, \"name\": \"cool\" }")
-        user1.id.should eq(1)
-        user1.name.should eq("cool")
       end
     end
 
@@ -78,9 +74,19 @@ describe "Session" do
       user.should be_nil
     end
 
-    it "will raise error if storable object is missing unserialize" do
-      expect_raises("Session::StorableObject::NotImplementedException") do
-        BadUser.unserialize("wow")
+    it "will be serialized in memory engine" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_raises Exception, "calling to_json" do
+        session.object("obj", UserTestSerialization.new(1_i64))
+      end
+    end
+
+    it "will be deserialized in memory engine" do
+      session = Session.new(create_context(SESSION_ID))
+      session.object("obj", UserTestDeserialization.new(1_i64))
+      s = Session.get(SESSION_ID)
+      expect_raises Exception, "calling from_json" do
+        s.as(Session).object("obj")
       end
     end
   end

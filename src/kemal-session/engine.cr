@@ -49,7 +49,7 @@ class Session
     string: String,
     float: Float64,
     bool: Bool,
-    object: Session::StorableObject
+    object: StorableObjects,
   })
   GC.new
 end

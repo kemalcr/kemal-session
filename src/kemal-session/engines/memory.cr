@@ -7,6 +7,14 @@ class Session
         getter! id : String
         property! last_access_at : Int64
 
+        JSON.mapping({
+          {% for name, type in vars %}
+            {{name.id}}s: Hash(String, {{type}}),
+          {% end %}
+          last_access_at: Int64,
+          id: String,
+        })
+
         {% for name, type in vars %}
           @{{name.id}}s = Hash(String, {{type}}).new
           @last_access_at = Time.new.epoch_ms
@@ -41,19 +49,22 @@ class Session
         string: String,
         float: Float64,
         bool: Bool,
-        object: Session::StorableObject
+        object: StorableObjects
       })
     end
 
-    @store : Hash(String, StorageInstance)
+    @store : Hash(String, String)
 
     def initialize
-      @store = {} of String => StorageInstance
+      @store = {} of String => String
     end
 
     def run_gc
       before = (Time.now - Session.config.timeout.as(Time::Span)).epoch_ms
-      @store.delete_if { |id, entry| entry.last_access_at < before }
+      @store.delete_if do |id, entry|
+        last_access_at = Int64.from_json(entry, root: "last_access_at")
+        last_access_at < before
+      end
       sleep Session.config.gc_interval
     end
 
@@ -64,7 +75,7 @@ class Session
     end
 
     def create_session(session_id : String)
-      @store[session_id] = StorageInstance.new(session_id)
+      @store[session_id] = StorageInstance.new(session_id).to_json
     end
 
     def each_session
@@ -95,22 +106,30 @@ class Session
       {% for name, type in vars %}
 
         def {{name.id}}(session_id : String, k : String) : {{type}}
-          return @store[session_id].{{name.id}}(k)
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          return storage_instance.{{name.id}}(k)
         end
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?
-          return @store[session_id]?.try &.{{name.id}}?(k)
+          return nil if @store[session_id].nil?
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          return storage_instance.{{name.id}}?(k)
         end
 
         def {{name.id}}(session_id : String, k : String, v : {{type}})
-          store = @store[session_id]? || begin
-            @store[session_id] = StorageInstance.new(session_id)
+          if @store[session_id].nil?
+            storage_instance = StorageInstance.new(session_id)
+          else
+            storage_instance = StorageInstance.from_json(@store[session_id])
           end
-          store.{{name.id}}(k, v)
+          storage_instance.{{name.id}}(k, v)
+          @store[session_id] = storage_instance.to_json
         end
 
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-          return @store[session_id]?.try &.{{name.id}}s
+          return {} of String => {{ type }} if @store[session_id].nil?
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          return storage_instance.{{name.id}}s
         end
       {% end %}
     end
@@ -121,7 +140,7 @@ class Session
       string: String,
       float: Float64,
       bool: Bool,
-      object: Session::StorableObject
+      object: StorableObjects,
     })
   end
 end

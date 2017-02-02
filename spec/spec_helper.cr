@@ -14,6 +14,10 @@ SESSION_SECRET = "b3c631c314c0bbca50c1b2843150fe33"
 SESSION_ID     = SecureRandom.hex
 SIGNED_SESSION = "#{SESSION_ID}--#{Session.sign_value(SESSION_ID)}"
 
+def create_new_session
+  create_context(SecureRandom.hex)
+end
+
 def create_context(session_id : String)
   response = HTTP::Server::Response.new(IO::Memory.new)
   headers = HTTP::Headers.new
@@ -32,30 +36,41 @@ def create_context(session_id : String)
   return HTTP::Server::Context.new(request, response)
 end
 
-class User < Session::StorableObject
+class User
   JSON.mapping(
     id: Int32,
     name: String
   )
+  include Session::StorableObject
 
   def initialize(@id : Int32, @name : String)
   end
-
-  def serialize
-    return to_json
-  end
-
-  def self.unserialize(str : String)
-    return User.from_json(str)
-  end
 end
 
-class BadUser < Session::StorableObject
-  property name
+class UserTestSerialization
+  def initialize(@id : Int64); end
 
-  def initialize(@name : String); end
-
-  def serialize
-    return @name
+  def self.from_json(parser)
+    raise Exception.new("calling from_json")
   end
+
+  def to_json(json)
+    raise Exception.new("calling to_json")
+  end
+
+  include Session::StorableObject
+end
+
+class UserTestDeserialization
+  def initialize(@id : Int64); end
+
+  def self.from_json(parser)
+    raise Exception.new("calling from_json")
+  end
+
+  def to_json(json : JSON::Builder)
+    json.number(@id)
+  end
+
+  include Session::StorableObject
 end

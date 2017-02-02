@@ -52,6 +52,22 @@ describe "Session::FileEngine" do
     end
   end
 
+  describe ".bigint" do
+    it "can save a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bigint("bigbar", 12_i64)
+      get_file_session_contents(SESSION_ID).should \
+        eq("{\"ints\":{},\"bigints\":{\"bigbar\":12},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{}}")
+    end
+
+    it "can retrieve a saved value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bigint("bigbar", 12_i64)
+      session.bigint("bigbar").should eq 12
+      session.bigint("bigbar").is_a?(Int64).should be_true
+    end
+  end
+
   describe ".bool" do
     it "can save a value" do
       session = Session.new(create_context(SESSION_ID))
@@ -71,12 +87,29 @@ describe "Session::FileEngine" do
     it "can save a value" do
       session = Session.new(create_context(SESSION_ID))
       session.float("bar", 3.00)
+      get_file_session_contents(SESSION_ID).should \
+        eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{\"bar\":3.0},\"bools\":{},\"objects\":{}}")
     end
 
     it "can retrieve a saved value" do
       session = Session.new(create_context(SESSION_ID))
       session.float("bar", 3.00)
       session.float("bar").should eq 3.00
+    end
+  end
+
+  describe ".string" do
+    it "can save a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.string("bar", "kemal")
+      get_file_session_contents(SESSION_ID).should \
+        eq("{\"ints\":{},\"bigints\":{},\"strings\":{\"bar\":\"kemal\"},\"floats\":{},\"bools\":{},\"objects\":{}}")
+    end
+
+    it "can retrieve a saved value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.string("bar", "kemal")
+      session.string("bar").should eq "kemal"
     end
   end
 end

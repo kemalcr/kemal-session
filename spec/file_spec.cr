@@ -112,4 +112,21 @@ describe "Session::FileEngine" do
       session.string("bar").should eq "kemal"
     end
   end
+
+  describe ".object" do
+    it "can be saved and retrieved" do
+      session = Session.new(create_context(SESSION_ID))
+      u = User.new(123, "charlie")
+      session.object("user", u)
+      get_file_session_contents(SESSION_ID).should \
+        eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"id\":123,\"name\":\"charlie\"}}}")
+
+      Session.config.engine.as(Session::FileEngine).clear_cache
+
+      session = Session.get(SESSION_ID).not_nil!
+      new_u = session.object("user").as(User)
+      new_u.id.should eq(123)
+      new_u.name.should eq("charlie")
+    end
+  end
 end

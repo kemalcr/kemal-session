@@ -10,7 +10,7 @@ Session.config.engine = Session::FileEngine.new({:sessions_dir => "./spec/assets
 Spec.before_each do
   sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
   Dir.foreach(sessions_path) do |file|
-    next if file == "."
+    next if file == "." || file == ".."
     File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
   end
   Session.config.engine.as(Session::FileEngine).clear_cache

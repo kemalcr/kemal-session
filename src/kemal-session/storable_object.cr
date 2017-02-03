@@ -19,6 +19,8 @@ class Session
     macro finished
       {% if !Session::STORABLE_TYPES.empty? %}
         alias StorableObjects = Union({{ *Session::STORABLE_TYPES }})
+      {% else %}
+        alias StorableObjects = Nil
       {% end %}
     end
   end

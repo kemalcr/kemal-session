@@ -1,3 +1,5 @@
+require "json"
+
 class Session
   macro abstract_engine(vars)
     abstract class Engine

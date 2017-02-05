@@ -111,23 +111,23 @@ class Session
         end
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?
-          return nil if @store[session_id].nil?
+          return nil unless @store[session_id]?
           storage_instance = StorageInstance.from_json(@store[session_id])
           return storage_instance.{{name.id}}?(k)
         end
 
         def {{name.id}}(session_id : String, k : String, v : {{type}})
-          if @store[session_id].nil?
-            storage_instance = StorageInstance.new(session_id)
-          else
+          if @store[session_id]?
             storage_instance = StorageInstance.from_json(@store[session_id])
+          else
+            storage_instance = StorageInstance.new(session_id)
           end
           storage_instance.{{name.id}}(k, v)
           @store[session_id] = storage_instance.to_json
         end
 
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-          return {} of String => {{ type }} if @store[session_id].nil?
+          return {} of String => {{ type }} unless @store[session_id]?
           storage_instance = StorageInstance.from_json(@store[session_id])
           return storage_instance.{{name.id}}s
         end

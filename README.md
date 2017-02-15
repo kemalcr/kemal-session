@@ -121,7 +121,7 @@ Session.config.gc_interval = 2.minutes # 2 minutes
 |---|---|---|
 | timeout | How long is the session valid after last user interaction?  | ```Time::Span.new(1, 0, 0)``` (1 hour)  |
 | cookie_name | Name of the cookie that holds the session_id on the client | ```"kemal_sessid"``` |
-| engine | How are the sessions saved on the server? (see section below) | ```Session::FileSystemEngine.new({sessions_dir: "./sessions/"})``` |
+| engine | How are the sessions saved on the server? (see section below) | ```Session::FileEngine.new({sessions_dir: "./sessions/"})``` |
 | gc_interval | In which interval should the garbage collector find and delete expired sessions from the server?  | ```Time::Span.new(0, 4, 0)``` (4 minutes)  |
 | secret | Used to sign the session ids before theyre saved in the cookie. *Strongly* encouraged to [create your own secret](#creating-a-new-secret) | ```""``` |
 | secure | The cookie used for session management should only be transmitted over encrypted connections. | ```false``` |
@@ -132,7 +132,7 @@ The standard engine is the MemoryEngine
 The engine you use has a huge impact on performance and can enable you to share sessions between different servers, make them available to any other application or whatever you can imagine. So the choice of engine is very important.
 
 ```crystal
-Session.config.engine = Session::FileSystemEngine.new({sessions_dir: "/var/foobar/sessions/"})
+Session.config.engine = Session::FileEngine.new({sessions_dir: "/var/foobar/sessions/"})
 ```
 You can also write your own engine if you like. Take a look at the [wiki page](https://github.com/kemalcr/kemal-session/wiki/Creating-your-own-engine). If you think it might also be helpful for others just let me know about it and I will include it in a list of known engines or something.
 
@@ -169,11 +169,10 @@ Additionally, depending on the engine used and on how many active sessions there
 - Storing of Int32, String, Float64 and Bool values
 - Garbage collector that removes expired sessions from the server
 - Memory engine
+- File engine
 - Manage sessions: Session.all, Session.remove(id), Session.get(id)
 
 ## Compatible Engines
-
-- [kemal-session-file](https://github.com/kemalcr/kemal-session-file): File system based persistent storage session engine.
 - [kemal-session-redis](https://github.com/neovintage/kemal-session-redis): Redis based session storage engine.
 
 ### Thanks

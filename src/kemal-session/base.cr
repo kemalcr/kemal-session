@@ -51,7 +51,11 @@ class Session
   # Removes a session from storage
   #
   def self.destroy(id : String)
+    before_destroy(id)
     Session.config.engine.destroy_session(id)
+  end
+
+  def self.before_destroy( id : String)
   end
 
   # Invalidates the session by removing it from storage so that its

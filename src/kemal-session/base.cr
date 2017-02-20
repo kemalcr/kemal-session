@@ -51,11 +51,7 @@ class Session
   # Removes a session from storage
   #
   def self.destroy(id : String)
-    before_destroy(id)
     Session.config.engine.destroy_session(id)
-  end
-
-  def self.before_destroy( id : String)
   end
 
   # Invalidates the session by removing it from storage so that its
@@ -68,6 +64,22 @@ class Session
       context.response.cookies[Session.config.cookie_name].value = ""
     end
     Session.destroy(@id)
+  end
+
+  # Captures a block to be called when the session is garbage collected
+  # the block accepts a string, the id of the session being collected,
+  # as a parameter
+  def self.timeout(&block : String ->)
+    @@timeout_block = block
+  end
+
+  # Called when a session has been garbage collected
+  # checks if a @timeout_block has been set, and calls if it it has
+  def self.timeout(id : String)
+    if (callback = @@timeout_block)
+      callback.call id
+    end
+    destroy(id)
   end
 
   # Destroys all of the sessions stored in the storage engine

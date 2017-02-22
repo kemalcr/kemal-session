@@ -51,7 +51,7 @@ class Session
     string: String,
     float: Float64,
     bool: Bool,
-    object: StorableObjects,
+    object: Session::StorableObject::StorableObjects,
   })
   GC.new
 end

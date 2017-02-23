@@ -121,7 +121,7 @@ Session.config.gc_interval = 2.minutes # 2 minutes
 |---|---|---|
 | timeout | How long is the session valid after last user interaction?  | ```Time::Span.new(1, 0, 0)``` (1 hour)  |
 | cookie_name | Name of the cookie that holds the session_id on the client | ```"kemal_sessid"``` |
-| engine | How are the sessions saved on the server? (see section below) | ```Session::FileEngine.new({sessions_dir: "./sessions/"})``` |
+| engine | How are the sessions saved on the server? (see section below) | ```Session::MemoryEngine.new``` |
 | gc_interval | In which interval should the garbage collector find and delete expired sessions from the server?  | ```Time::Span.new(0, 4, 0)``` (4 minutes)  |
 | secret | Used to sign the session ids before theyre saved in the cookie. *Strongly* encouraged to [create your own secret](#creating-a-new-secret) | ```""``` |
 | secure | The cookie used for session management should only be transmitted over encrypted connections. | ```false``` |

@@ -46,6 +46,7 @@ class Session
 
     @cache : StorageInstance
     @cached_session_id : String
+    @cached_session_read_time : Time
 
     def initialize(options : Hash(Symbol, String))
       # @TODO make options optional (default value for sessions_dir = ./sessions/, maybe add format option (json, yaml...))
@@ -53,8 +54,8 @@ class Session
       raise ArgumentError.new("FileEngine: Cannot write to directory #{options[:sessions_dir]}") unless File.directory?(options[:sessions_dir]) && File.writable?(options[:sessions_dir])
       @sessions_dir = uninitialized String
       @sessions_dir = options[:sessions_dir]
-
       @cache = StorageInstance.new
+      @cached_session_read_time = Time.utc_now
       @cached_session_id = ""
     end
 
@@ -79,6 +80,10 @@ class Session
     end
 
     def is_in_cache?(session_id : String) : Bool
+      if (@cached_session_read_time.epoch / 60) < (Time.utc_now.epoch / 60)
+        @cached_session_read_time = Time.utc_now
+        File.utime(Time.now, Time.now, @sessions_dir + session_id + ".json")
+      end
       return session_id == @cached_session_id
     end
 
@@ -88,9 +93,11 @@ class Session
 
     def read_or_create_storage_instance(session_id : String) : StorageInstance
       if File.file? @sessions_dir + session_id + ".json"
+        @cached_session_read_time = File.stat(@sessions_dir + session_id + ".json").mtime
         return StorageInstance.from_json(File.read(@sessions_dir + session_id + ".json"))
       else
         instance = StorageInstance.new
+        @cached_session_read_time = Time.utc_now
         File.write(@sessions_dir + session_id + ".json", instance.to_json)
         return instance
       end

@@ -91,6 +91,17 @@ describe "Session" do
     end
   end
 
+  describe ".clear" do
+    it "should empty the contents of a session while preserving the id" do
+      context = create_context(SESSION_ID)
+      session = Session.new(context)
+      temp_id = session.id
+      session.int("user_id", 123)
+      session.clear
+      session.int?("user_id").should be_nil
+    end
+  end
+
   describe ".destroy" do
     it "should delete a session and remove cookie in current session" do
       context = create_context(SESSION_ID)

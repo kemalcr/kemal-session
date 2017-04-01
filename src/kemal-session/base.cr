@@ -48,6 +48,17 @@ class Session
     @context = nil
   end
 
+  # Clears the contents of the session from session storage. The
+  # difference between `destroy` and `clear` is that `destroy` completely
+  # removes the session while `clear` will allow the same session
+  # id to be reused in kemal. Applications will want to use `clear` unless
+  # administration work is needed
+  #
+  def clear
+    destroy
+    Session.config.engine.create_session(@id)
+  end
+
   # Removes a session from storage
   #
   def self.destroy(id : String)
@@ -60,7 +71,7 @@ class Session
   # cookie will be emptied.
   #
   def destroy
-    if context = @context 
+    if context = @context
       context.response.cookies[Session.config.cookie_name].value = ""
     end
     Session.destroy(@id)

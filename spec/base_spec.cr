@@ -27,6 +27,22 @@ describe "Session" do
     end
   end
 
+  describe ".delete_int" do
+    it "can delete the contents of a key" do
+      session = Session.new(create_context(SESSION_ID))
+      session.int("user_id", 123)
+      session.delete_int("user_id")
+      session.int?("user_id").should be_nil
+    end
+
+    it "should succeed if the key does not exist" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_int("user_id")
+      end
+    end
+  end
+
   describe ".int?" do
     it "can return nil" do
       session = Session.new(create_context(SESSION_ID))
@@ -52,6 +68,22 @@ describe "Session" do
       session.bigint("bigbar", 12_i64)
       session.bigint("bigbar").should eq 12
       session.bigint("bigbar").is_a?(Int64).should be_true
+    end
+  end
+
+  describe ".delete_bigint" do
+    it "can delete the contents of a key" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bigint("user_id", 123_i64)
+      session.delete_bigint("user_id")
+      session.bigint?("user_id").should be_nil
+    end
+
+    it "should succeed if the key does not exist" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_bigint("user_id")
+      end
     end
   end
 
@@ -87,6 +119,22 @@ describe "Session" do
       s = Session.get(SESSION_ID)
       expect_raises Exception, "calling from_json" do
         s.as(Session).object("obj")
+      end
+    end
+  end
+
+  describe ".delete_object" do
+    it "can delete the contents of a key" do
+      session = Session.new(create_context(SESSION_ID))
+      session.object("obj", User.new(1, "cool"))
+      session.delete_object("obj")
+      session.object?("obj").should be_nil
+    end
+
+    it "should succeed if the key does not exist" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_bigint("obj")
       end
     end
   end

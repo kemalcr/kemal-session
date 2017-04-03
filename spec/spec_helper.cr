@@ -36,6 +36,17 @@ def create_context(session_id : String)
   return HTTP::Server::Context.new(request, response)
 end
 
+macro expect_not_raises(file = __FILE__, line = __LINE__)
+  %failed = false
+  begin
+    {{yield}}
+  rescue %ex
+    %ex_to_s = %ex.to_s
+    backtrace = %ex.backtrace.map { |f| "  # #{f}" }.join "\n"
+    fail "Expected no exception, got #<#{ %ex.class }: #{ %ex_to_s }> with backtrace:\n#{backtrace}", {{file}}, {{line}}
+  end
+end
+
 class User
   JSON.mapping(
     id: Int32,

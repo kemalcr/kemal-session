@@ -20,6 +20,11 @@ def get_file_session_contents(session_id)
   File.read(File.join(Dir.current, "spec", "assets", "sessions", "#{session_id}.json"))
 end
 
+def should_be_empty_file_session(session_id)
+  get_file_session_contents(session_id).should \
+    eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{}}")
+end
+
 describe "Session::FileEngine" do
   describe "options" do
     describe ":sessions_dir" do
@@ -52,6 +57,22 @@ describe "Session::FileEngine" do
     end
   end
 
+  describe ".delete_int" do
+    it "can delete a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.int("bar", 12)
+      session.delete_int("bar")
+      should_be_empty_file_session(SESSION_ID)
+    end
+
+    it "shouldnt raise an error on empty key" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_int("bar")
+      end
+    end
+  end
+
   describe ".bigint" do
     it "can save a value" do
       session = Session.new(create_context(SESSION_ID))
@@ -65,6 +86,22 @@ describe "Session::FileEngine" do
       session.bigint("bigbar", 12_i64)
       session.bigint("bigbar").should eq 12
       session.bigint("bigbar").is_a?(Int64).should be_true
+    end
+  end
+
+  describe ".delete_bigint" do
+    it "can delete a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bigint("bar", 12_i64)
+      session.delete_bigint("bar")
+      should_be_empty_file_session(SESSION_ID)
+    end
+
+    it "shouldnt raise an error on empty key" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_bigint("bar")
+      end
     end
   end
 
@@ -83,6 +120,22 @@ describe "Session::FileEngine" do
     end
   end
 
+  describe ".delete_bool" do
+    it "can delete a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.bool("bar", true)
+      session.delete_bool("bar")
+      should_be_empty_file_session(SESSION_ID)
+    end
+
+    it "shouldnt raise an error on empty key" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_bool("bar")
+      end
+    end
+  end
+
   describe ".float" do
     it "can save a value" do
       session = Session.new(create_context(SESSION_ID))
@@ -95,6 +148,22 @@ describe "Session::FileEngine" do
       session = Session.new(create_context(SESSION_ID))
       session.float("bar", 3.00)
       session.float("bar").should eq 3.00
+    end
+  end
+
+  describe ".delete_float" do
+    it "can delete a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.float("bar", 3.00)
+      session.delete_float("bar")
+      should_be_empty_file_session(SESSION_ID)
+    end
+
+    it "shouldnt raise an error on empty key" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_float("bar")
+      end
     end
   end
 
@@ -113,6 +182,22 @@ describe "Session::FileEngine" do
     end
   end
 
+  describe ".delete_string" do
+    it "can delete a value" do
+      session = Session.new(create_context(SESSION_ID))
+      session.string("bar", "blah")
+      session.delete_string("bar")
+      should_be_empty_file_session(SESSION_ID)
+    end
+
+    it "shouldnt raise an error on empty key" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_string("bar")
+      end
+    end
+  end
+
   describe ".object" do
     it "can be saved and retrieved" do
       session = Session.new(create_context(SESSION_ID))
@@ -127,6 +212,23 @@ describe "Session::FileEngine" do
       new_u = session.object("user").as(User)
       new_u.id.should eq(123)
       new_u.name.should eq("charlie")
+    end
+  end
+
+  describe ".delete_object" do
+    it "can delete a value" do
+      session = Session.new(create_context(SESSION_ID))
+      u = User.new(123, "charlie")
+      session.object("user", u)
+      session.delete_object("user")
+      should_be_empty_file_session(SESSION_ID)
+    end
+
+    it "shouldnt raise an error on empty key" do
+      session = Session.new(create_context(SESSION_ID))
+      expect_not_raises do
+        session.delete_object("user")
+      end
     end
   end
 

@@ -25,6 +25,12 @@ class Session
           def {{name.id}}(k : String, v : {{type}})
             @{{name.id}}s[k] = v
           end
+
+          def delete_{{name.id}}(k : String)
+            if @{{name.id}}s[k]?
+              @{{name.id}}s.delete(k)
+            end
+          end
         {% end %}
 
         def initialize
@@ -173,6 +179,12 @@ class Session
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
           load_into_cache(session_id) unless is_in_cache?(session_id)
           return @cache.{{name.id}}s
+        end
+
+        def delete_{{name.id}}(session_id : String, k : String)
+          load_into_cache(session_id) unless is_in_cache?(session_id)
+          @cache.delete_{{name.id}}(k)
+          save_cache
         end
       {% end %}
     end

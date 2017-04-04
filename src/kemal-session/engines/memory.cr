@@ -34,6 +34,11 @@ class Session
             @last_access_at = Time.new.epoch_ms
             @{{name.id}}s[k] = v
           end
+
+          def delete_{{name.id}}(k : String)
+            @last_access_at = Time.new.epoch_ms
+            @{{name.id}}s.delete(k) if @{{name.id}}s.has_key?(k)
+          end
         {% end %}
 
         def initialize(@id : String)
@@ -130,6 +135,13 @@ class Session
           return {} of String => {{ type }} unless @store[session_id]?
           storage_instance = StorageInstance.from_json(@store[session_id])
           return storage_instance.{{name.id}}s
+        end
+
+        def delete_{{name.id}}(session_id : String, k : String)
+          return nil unless @store[session_id]?
+          storage_instance = StorageInstance.from_json(@store[session_id])
+          storage_instance.delete_{{name.id}}(k)
+          @store[session_id] = storage_instance.to_json
         end
       {% end %}
     end

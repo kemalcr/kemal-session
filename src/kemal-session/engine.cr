@@ -42,6 +42,10 @@ class Session
         Session.config.engine.{{name.id}}(@id, k, v)
       end
 
+      def delete_{{name.id}}( k : String)
+        Session.config.engine.delete_{{name.id}}(@id, k)
+      end
+
     {% end %}
   end
 

@@ -76,6 +76,7 @@ class UserTestDeserialization
   def initialize(@id : Int64); end
 
   def self.from_json(parser)
+    puts "here am i"
     raise Exception.new("calling from_json")
   end
 

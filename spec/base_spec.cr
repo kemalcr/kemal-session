@@ -118,7 +118,6 @@ describe "Session" do
       session.object("obj", UserTestDeserialization.new(1_i64))
       s = Session.get(SESSION_ID)
       expect_raises Exception, "calling from_json" do
-        puts "it works"
         s.as(Session).object("obj").as(UserTestDeserialization)
       end
     end

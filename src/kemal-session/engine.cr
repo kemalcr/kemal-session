@@ -14,32 +14,59 @@ class Session
 
       {% for name, type in vars %}
 
-        abstract def {{name.id}}(session_id : String, k : String) : {{type}}
-        abstract def {{name.id}}?(session_id : String, k : String) : {{type}}?
-        abstract def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-        abstract def {{name.id}}(session_id : String, k : String, v : {{type}})
+        {% if name != "object" %}
+          {% t = type %}
+        {% else %}
+          {% t = "Session::StorableObject::StorableObjectContainer" %}
+        {% end %}
+
+        abstract def {{name.id}}(session_id : String, k : String) : {{t.id}}
+        abstract def {{name.id}}?(session_id : String, k : String) : {{t.id}}?
+        abstract def {{name.id}}s(session_id : String) : Hash(String, {{t.id}})
+        abstract def {{name.id}}(session_id : String, k : String, v : {{t.id}})
 
       {% end %}
 
     end
 
     # generate delegators for each type (Session -> Engine)
+    # for base types:
     {% for name, type in vars %}
 
       def {{name.id}}(k : String) : {{type}}
-        Session.config.engine.{{name.id}}(@id, k)
+        {% if name == "object" %}
+          container = Session.config.engine.{{name.id}}(@id, k)
+          container.object
+        {% else %}
+          Session.config.engine.{{name.id}}(@id, k)
+        {% end %}
       end
 
       def {{name.id}}?(k : String) : {{type}}?
-        Session.config.engine.{{name.id}}?(@id, k)
+        {% if name == "object" %}
+          container = Session.config.engine.{{name.id}}?(@id, k)
+          return nil if container.nil?
+          container.object
+        {% else %}
+          Session.config.engine.{{name.id}}?(@id, k)
+        {% end %}
       end
 
       def {{name.id}}s : Hash(String, {{type}})
-        Session.config.engine.{{name.id}}s(@id)
+        {% if name == "object" %}
+          Session.config.engine.{{name.id}}s(@id).map { |x| x.object }
+        {% else %}
+          Session.config.engine.{{name.id}}s(@id)
+        {% end %}
       end
 
       def {{name.id}}( k : String, v : {{type}})
-        Session.config.engine.{{name.id}}(@id, k, v)
+        {% if name == "object" %}
+          c = Session::StorableObject::StorableObjectContainer.new(v)
+          Session.config.engine.{{name.id}}(@id, k, c)
+        {% else %}
+          Session.config.engine.{{name.id}}(@id, k, v)
+        {% end %}
       end
 
       def delete_{{name.id}}( k : String)

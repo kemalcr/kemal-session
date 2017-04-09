@@ -85,3 +85,29 @@ class UserTestDeserialization
 
   include Session::StorableObject
 end
+
+class First
+  JSON.mapping({
+    id: Int64
+  })
+  include Session::StorableObject
+
+  def initialize(@id : Int64); end
+
+  def name
+    "first"
+  end
+end
+
+class Second
+  JSON.mapping({
+    id: Int64
+  })
+  include Session::StorableObject
+
+  def initialize(@id : Int64); end
+
+  def name
+    "second"
+  end
+end

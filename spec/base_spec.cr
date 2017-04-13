@@ -121,6 +121,15 @@ describe "Session" do
         s.as(Session).object("obj").as(UserTestDeserialization)
       end
     end
+
+    it "can deserialize multiple objects correctly" do
+      session = Session.new(create_context(SESSION_ID))
+      session.object("obj1", First.new(1_i64))
+      session.object("obj2", Second.new(2_i64))
+
+      session.object("obj1").class.should eq(First)
+      session.object("obj2").class.should eq(Second)
+    end
   end
 
   describe ".clear" do

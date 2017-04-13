@@ -204,7 +204,7 @@ describe "Session::FileEngine" do
       u = User.new(123, "charlie")
       session.object("user", u)
       get_file_session_contents(SESSION_ID).should \
-        eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"id\":123,\"name\":\"charlie\"}}}")
+        eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"type\":\"User\",\"object\":{\"id\":123,\"name\":\"charlie\"}}}}")
 
       Session.config.engine.as(Session::FileEngine).clear_cache
 

@@ -118,7 +118,7 @@ describe "Session" do
       session.object("obj", UserTestDeserialization.new(1_i64))
       s = Session.get(SESSION_ID)
       expect_raises Exception, "calling from_json" do
-        s.as(Session).object("obj")
+        s.as(Session).object("obj").as(UserTestDeserialization)
       end
     end
 
@@ -129,6 +129,17 @@ describe "Session" do
 
       session.object("obj1").class.should eq(First)
       session.object("obj2").class.should eq(Second)
+    end
+  end
+
+  describe ".clear" do
+    it "should empty the contents of a session while preserving the id" do
+      context = create_context(SESSION_ID)
+      session = Session.new(context)
+      temp_id = session.id
+      session.int("user_id", 123)
+      session.clear
+      session.int?("user_id").should be_nil
     end
   end
 

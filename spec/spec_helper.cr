@@ -62,7 +62,8 @@ class UserTestSerialization
   def initialize(@id : Int64); end
 
   def self.from_json(parser)
-    raise Exception.new("calling from_json")
+    p = JSON::PullParser.new(parser)
+    UserTestSerialization.new(p.read_int)
   end
 
   def to_json(json)

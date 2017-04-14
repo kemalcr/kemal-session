@@ -1,5 +1,11 @@
 require "./spec_helper"
 
+# Config Options
+#
+Session.config.engine = Session::MemoryEngine.new
+Session.config.secret = "kemal_rocks"
+SIGNED_SESSION = "#{SESSION_ID}--#{Session.sign_value(SESSION_ID)}"
+
 describe "Session" do
   describe ".start" do
     it "returns a Session instance" do
@@ -116,8 +122,8 @@ describe "Session" do
     it "will be deserialized in memory engine" do
       session = Session.new(create_context(SESSION_ID))
       session.object("obj", UserTestDeserialization.new(1_i64))
-      s = Session.get(SESSION_ID)
       expect_raises Exception, "calling from_json" do
+        s = Session.get(SESSION_ID)
         s.as(Session).object("obj")
       end
     end

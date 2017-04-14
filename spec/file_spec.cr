@@ -8,12 +8,14 @@ Session.config.secret = "super-awesome-secret"
 Session.config.engine = Session::FileEngine.new({:sessions_dir => "./spec/assets/sessions/"})
 
 Spec.before_each do
-  sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
-  Dir.foreach(sessions_path) do |file|
-    next if file == "." || file == ".."
-    File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
+  if Session.config.engine.class == Session::FileEngine
+    sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
+    Dir.foreach(sessions_path) do |file|
+      next if file == "." || file == ".."
+      File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
+    end
+    Session.config.engine.as(Session::FileEngine).clear_cache
   end
-  Session.config.engine.as(Session::FileEngine).clear_cache
 end
 
 def get_file_session_contents(session_id)

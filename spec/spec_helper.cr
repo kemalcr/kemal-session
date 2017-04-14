@@ -3,16 +3,7 @@ require "json"
 require "../src/kemal-session"
 require "file_utils"
 
-# Config Options
-#
-Session.config.engine = Session::MemoryEngine.new
-Session.config.secret = "kemal_rocks"
-
-# For testing cookie signing and for having a valid session
-#
-SESSION_SECRET = "b3c631c314c0bbca50c1b2843150fe33"
-SESSION_ID     = SecureRandom.hex
-SIGNED_SESSION = "#{SESSION_ID}--#{Session.sign_value(SESSION_ID)}"
+SESSION_ID = SecureRandom.hex
 
 def create_new_session
   create_context(SecureRandom.hex)

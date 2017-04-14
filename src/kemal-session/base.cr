@@ -48,13 +48,13 @@ class Session
     @context = nil
   end
 
-  # Clearing the session will remove the contents of the current session
+  # Resetting the session will remove the contents of the current session
   # from session storage and create a new session for use within the
   # current request. The `.destroy` method will remove the session from
   # session storage and not create a new session for use within the current
   # request
   #
-  def clear
+  def reset
     destroy
     if context = @context
       @id = SecureRandom.hex

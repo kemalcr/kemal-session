@@ -160,7 +160,7 @@ describe "Session" do
       session = Session.new(context)
       session.int("user_id", 123)
       current_cookie = context.response.cookies[Session.config.cookie_name].value
-      session.clear
+      session.reset
       new_cookie = context.response.cookies[Session.config.cookie_name].value
       new_cookie.should_not      eq(current_cookie)
       new_cookie.size.should_not eq(0)

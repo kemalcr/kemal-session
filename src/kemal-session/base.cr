@@ -48,6 +48,27 @@ class Session
     @context = nil
   end
 
+  # Clearing the session will remove the contents of the current session
+  # from session storage and create a new session for use within the
+  # current request. The `.destroy` method will remove the session from
+  # session storage and not create a new session for use within the current
+  # request
+  #
+  def clear
+    destroy
+    if context = @context
+      @id = SecureRandom.hex
+      Session.config.engine.create_session(@id)
+      context.response.cookies << HTTP::Cookie.new(
+        name: Session.config.cookie_name,
+        value: self.class.encode(id),
+        expires: Time.now.to_utc + Session.config.timeout,
+        http_only: true,
+        secure: Session.config.secure
+      )
+    end
+  end
+
   # Removes a session from storage
   #
   def self.destroy(id : String)
@@ -60,7 +81,7 @@ class Session
   # cookie will be emptied.
   #
   def destroy
-    if context = @context 
+    if context = @context
       context.response.cookies[Session.config.cookie_name].value = ""
     end
     Session.destroy(@id)

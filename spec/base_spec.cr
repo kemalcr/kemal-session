@@ -148,6 +148,23 @@ describe "Session" do
     end
   end
 
+  describe ".clear" do
+    it "should delete the current session from session storage and the cookie value should be different" do
+      context = create_context(SESSION_ID)
+      session = Session.new(context)
+      session.int("user_id", 123)
+      current_cookie = context.response.cookies[Session.config.cookie_name].value
+      session.clear
+      new_cookie = context.response.cookies[Session.config.cookie_name].value
+      new_cookie.should_not      eq(current_cookie)
+      new_cookie.size.should_not eq(0)
+      Session.get(SESSION_ID).should be_nil
+      session.int("user_id", 456)
+      session = Session.get(session.id)
+      session.should_not be_nil
+    end
+  end
+
   describe ".destroy" do
     it "should delete a session and remove cookie in current session" do
       context = create_context(SESSION_ID)

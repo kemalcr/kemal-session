@@ -27,13 +27,7 @@ class Session
       Session.config.engine.create_session(id)
     end
 
-    ctx.response.cookies << HTTP::Cookie.new(
-      name: Session.config.cookie_name,
-      value: self.class.encode(id),
-      expires: Time.now.to_utc + Session.config.timeout,
-      http_only: true,
-      secure: Session.config.secure
-    )
+    ctx.response.cookies << Session.create_cookie(id)
     @id      = id
     @context = ctx
   end
@@ -59,13 +53,7 @@ class Session
     if context = @context
       @id = SecureRandom.hex
       Session.config.engine.create_session(@id)
-      context.response.cookies << HTTP::Cookie.new(
-        name: Session.config.cookie_name,
-        value: self.class.encode(id),
-        expires: Time.now.to_utc + Session.config.timeout,
-        http_only: true,
-        secure: Session.config.secure
-      )
+      context.response.cookies << self.class.create_cookie(@id)
     end
   end
 
@@ -126,8 +114,23 @@ class Session
     OpenSSL::HMAC.hexdigest(:sha1, secret, id)
   end
 
+  # :nodoc:
+  # pattern for signing the session id
   def self.encode(id : String)
     "#{id}--#{sign_value(id)}"
+  end
+
+  # :nodoc:
+  def self.create_cookie(session_id : String)
+    HTTP::Cookie.new(
+      name: Session.config.cookie_name,
+      value: self.encode(session_id),
+      expires: Time.now.to_utc + Session.config.timeout,
+      http_only: true,
+      secure: Session.config.secure,
+      path: Session.config.path,
+      domain: Session.config.domain,
+    )
   end
 
   class SecretRequiredException < Exception

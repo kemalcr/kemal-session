@@ -1,5 +1,11 @@
 require "./spec_helper"
 
+# Config Options
+#
+Session.config.engine = Session::MemoryEngine.new
+Session.config.secret = "kemal_rocks"
+SIGNED_SESSION = "#{SESSION_ID}--#{Session.sign_value(SESSION_ID)}"
+
 describe "Session" do
   describe ".start" do
     it "returns a Session instance" do
@@ -116,8 +122,8 @@ describe "Session" do
     it "will be deserialized in memory engine" do
       session = Session.new(create_context(SESSION_ID))
       session.object("obj", UserTestDeserialization.new(1_i64))
-      s = Session.get(SESSION_ID)
       expect_raises Exception, "calling from_json" do
+        s = Session.get(SESSION_ID)
         s.as(Session).object("obj")
       end
     end
@@ -145,6 +151,23 @@ describe "Session" do
       expect_not_raises do
         session.delete_bigint("obj")
       end
+    end
+  end
+
+  describe ".clear" do
+    it "should delete the current session from session storage and the cookie value should be different" do
+      context = create_context(SESSION_ID)
+      session = Session.new(context)
+      session.int("user_id", 123)
+      current_cookie = context.response.cookies[Session.config.cookie_name].value
+      session.reset
+      new_cookie = context.response.cookies[Session.config.cookie_name].value
+      new_cookie.should_not      eq(current_cookie)
+      new_cookie.size.should_not eq(0)
+      Session.get(SESSION_ID).should be_nil
+      session.int("user_id", 456)
+      session = Session.get(session.id)
+      session.should_not be_nil
     end
   end
 

@@ -93,6 +93,30 @@ describe "Session" do
     end
   end
 
+  describe ".objects" do
+    it "can retrieve multiple StorableObjects" do
+      session = Session.new(create_context(SESSION_ID))
+      session.object("obj1", User.new(1, "cool"))
+      session.object("obj2", User.new(2, "dude"))
+      result = session.objects
+      result.size.should eq(2)
+    end
+  end
+
+  describe ".object?" do
+    it "will return an object when one exists" do
+      session = Session.new(create_context(SESSION_ID))
+      user = User.new(1, "cool")
+      session.object("obj1", user)
+      session.object?("obj1").should_not be_nil
+    end
+
+    it "will return nil when an object doesnt exist" do
+      session = Session.new(create_context(SESSION_ID))
+      session.object?("obj1").should be_nil
+    end
+  end
+
   describe ".object" do
     it "can be saved" do
       session = Session.new(create_context(SESSION_ID))
@@ -104,12 +128,6 @@ describe "Session" do
         user.id.should eq(1)
         user.name.should eq("cool")
       end
-    end
-
-    it "can return nil" do
-      session = Session.new(create_context(SESSION_ID))
-      user = session.object?("obj")
-      user.should be_nil
     end
 
     it "will be serialized in memory engine" do

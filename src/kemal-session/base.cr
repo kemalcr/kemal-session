@@ -75,6 +75,22 @@ class Session
     Session.destroy(@id)
   end
 
+  # Captures a block to be called when the session is garbage collected
+  # the block accepts a string, the id of the session being collected,
+  # as a parameter
+  def self.timeout(&block : String ->)
+    @@timeout_block = block
+  end
+
+  # Called when a session has been garbage collected
+  # checks if a @timeout_block has been set, and calls if it it has
+  def self.timeout(id : String)
+    if (callback = @@timeout_block)
+      callback.call id
+    end
+    destroy(id)
+  end
+
   # Destroys all of the sessions stored in the storage engine
   #
   def self.destroy_all

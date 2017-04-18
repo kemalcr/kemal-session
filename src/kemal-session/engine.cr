@@ -54,7 +54,9 @@ class Session
 
       def {{name.id}}s : Hash(String, {{type}})
         {% if name == "object" %}
-          Session.config.engine.{{name.id}}s(@id).map { |x| x.object }
+          Session.config.engine.{{name.id}}s(@id).each_with_object({} of String => {{type}}) do |h, obj|
+            obj[h[0]] = h[1].object
+          end
         {% else %}
           Session.config.engine.{{name.id}}s(@id)
         {% end %}

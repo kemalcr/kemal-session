@@ -88,7 +88,11 @@ class Session
     def is_in_cache?(session_id : String) : Bool
       if (@cached_session_read_time.epoch / 60) < (Time.utc_now.epoch / 60)
         @cached_session_read_time = Time.utc_now
-        File.utime(Time.now, Time.now, @sessions_dir + session_id + ".json")
+        begin
+          File.utime(Time.now, Time.now, @sessions_dir + session_id + ".json")
+        rescue ex
+          puts "Kemal-session cannot update time of a sesssion file. This may not be possible on your current file system"
+        end
       end
       return session_id == @cached_session_id
     end
@@ -100,13 +104,15 @@ class Session
     def read_or_create_storage_instance(session_id : String) : StorageInstance
       if File.file? @sessions_dir + session_id + ".json"
         @cached_session_read_time = File.stat(@sessions_dir + session_id + ".json").mtime
-        return StorageInstance.from_json(File.read(@sessions_dir + session_id + ".json"))
-      else
-        instance = StorageInstance.new
-        @cached_session_read_time = Time.utc_now
-        File.write(@sessions_dir + session_id + ".json", instance.to_json)
-        return instance
+        json = File.read(@sessions_dir + session_id + ".json")
+        if json && json.size > 0
+          return StorageInstance.from_json(json)
+        end
       end
+      instance = StorageInstance.new
+      @cached_session_read_time = Time.utc_now
+      File.write(@sessions_dir + session_id + ".json", instance.to_json)
+      return instance
     end
 
     def session_exists?(session_id : String) : Bool

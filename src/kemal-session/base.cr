@@ -10,7 +10,6 @@ class Session
   @context : HTTP::Server::Context?
 
   def initialize(ctx : HTTP::Server::Context)
-    Session.config.set_default_engine unless Session.config.engine_set?
     id = ctx.request.cookies[Session.config.cookie_name]?.try &.value
     valid = false
     if id
@@ -28,7 +27,7 @@ class Session
     end
 
     ctx.response.cookies << Session.create_cookie(id)
-    @id      = id
+    @id = id
     @context = ctx
   end
 
@@ -38,7 +37,7 @@ class Session
   # check on the session_id
   #
   def initialize(id : String)
-    @id      = id
+    @id = id
     @context = nil
   end
 

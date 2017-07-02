@@ -79,19 +79,19 @@ end
 ```
 
 Once a `Kemal::Session::StorableObject` has been defined, you can save that in session storage just like the base types. Here's an example using
-the `Kemal::Session::UserStorableObject` implementation:
+the `UserStorableObject` implementation:
 
 ```crystal
 require "kemal"
 require "kemal-session"
 
 get "/set" do |env|
-  user = Kemal::Session:UserStorableObject.new(123, "charlie")
+  user = UserStorableObject.new(123, "charlie")
   env.session.object("user", user)
 end
 
 get "/get" do |env|
-  user = env.session.object("user").as(Kemal::Session:UserStorableObject)
+  user = env.session.object("user").as(UserStorableObject)
   "The user stored in session is #{user.name}"
 end
 ```

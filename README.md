@@ -12,7 +12,6 @@ Add this to your application's `shard.yml`:
 dependencies:
   kemal-session:
     github: kemalcr/kemal-session
-    branch: master
 ```
 
 ## Usage

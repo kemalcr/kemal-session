@@ -4,19 +4,19 @@ describe "Session" do
   describe "::Config" do
     describe "::INSTANCE" do
       it "returns a Session::Config object" do
-        typeof(Session::Config::INSTANCE).should eq Session::Config
+        typeof(Kemal::Session::Config::INSTANCE).should eq Kemal::Session::Config
       end
     end
   end
 
   describe ".config" do
     it "returns Session::Config::INSTANCE" do
-      Session.config.should be Session::Config::INSTANCE
+      Kemal::Session.config.should be Kemal::Session::Config::INSTANCE
     end
 
     it "yields Session::Config::INSTANCE" do
-      Session.config do |config|
-        config.should be Session::Config::INSTANCE
+      Kemal::Session.config do |config|
+        config.should be Kemal::Session::Config::INSTANCE
       end
     end
   end

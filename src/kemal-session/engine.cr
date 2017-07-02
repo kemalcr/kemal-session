@@ -1,7 +1,8 @@
 require "json"
 
-class Session
-  macro abstract_engine(vars)
+module Kemal
+  class Session
+    macro abstract_engine(vars)
     abstract class Engine
 
       abstract def run_gc
@@ -17,7 +18,7 @@ class Session
         {% if name != "object" %}
           {% t = type %}
         {% else %}
-          {% t = "Session::StorableObject::StorableObjectContainer" %}
+          {% t = "Kemal::Session::StorableObject::StorableObjectContainer" %}
         {% end %}
 
         abstract def {{name.id}}(session_id : String, k : String) : {{t.id}}
@@ -38,7 +39,7 @@ class Session
           container = Session.config.engine.{{name.id}}(@id, k)
           container.object
         {% else %}
-          Session.config.engine.{{name.id}}(@id, k)
+          Kemal::Session.config.engine.{{name.id}}(@id, k)
         {% end %}
       end
 
@@ -48,43 +49,44 @@ class Session
           return nil if container.nil?
           container.object
         {% else %}
-          Session.config.engine.{{name.id}}?(@id, k)
+          Kemal::Session.config.engine.{{name.id}}?(@id, k)
         {% end %}
       end
 
       def {{name.id}}s : Hash(String, {{type}})
         {% if name == "object" %}
-          Session.config.engine.{{name.id}}s(@id).each_with_object({} of String => {{type}}) do |h, obj|
+          Kemal::Session.config.engine.{{name.id}}s(@id).each_with_object({} of String => {{type}}) do |h, obj|
             obj[h[0]] = h[1].object
           end
         {% else %}
-          Session.config.engine.{{name.id}}s(@id)
+          Kemal::Session.config.engine.{{name.id}}s(@id)
         {% end %}
       end
 
       def {{name.id}}( k : String, v : {{type}})
         {% if name == "object" %}
           c = Session::StorableObject::StorableObjectContainer.new(v)
-          Session.config.engine.{{name.id}}(@id, k, c)
+          Kemal::Session.config.engine.{{name.id}}(@id, k, c)
         {% else %}
-          Session.config.engine.{{name.id}}(@id, k, v)
+          Kemal::Session.config.engine.{{name.id}}(@id, k, v)
         {% end %}
       end
 
       def delete_{{name.id}}( k : String)
-        Session.config.engine.delete_{{name.id}}(@id, k)
+        Kemal::Session.config.engine.delete_{{name.id}}(@id, k)
       end
 
     {% end %}
   end
 
-  abstract_engine({
-    int: Int32,
-    bigint: Int64,
-    string: String,
-    float: Float64,
-    bool: Bool,
-    object: Session::StorableObject::StorableObjects,
-  })
-  GC.new
+    abstract_engine({
+      int:    Int32,
+      bigint: Int64,
+      string: String,
+      float:  Float64,
+      bool:   Bool,
+      object: Session::StorableObject::StorableObjects,
+    })
+    GC.new
+  end
 end

@@ -1,9 +1,10 @@
-class Session
-  STORABLE_TYPES = [] of Nil
+module Kemal
+  class Session
+    STORABLE_TYPES = [] of Nil
 
-  module StorableObject
-    macro included
-      {% Session::STORABLE_TYPES << @type %}
+    module StorableObject
+      macro included
+      {% Kemal::Session::STORABLE_TYPES << @type %}
 
       macro finished
         {% if !@type.class.overrides?(Object, "from_json") %}
@@ -16,7 +17,7 @@ class Session
       end
     end
 
-    macro finished
+      macro finished
       {% if !Session::STORABLE_TYPES.empty? %}
         alias StorableObjects = Union({{ *Session::STORABLE_TYPES }})
 
@@ -75,6 +76,7 @@ class Session
         alias StorableObjects = Nil
         alias StorableObjectContainer = Nil
       {% end %}
+    end
     end
   end
 end

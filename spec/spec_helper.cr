@@ -16,10 +16,10 @@ def create_context(session_id : String)
   # I would rather pass nil if no cookie should be created
   # but that throws an error
   unless session_id == ""
-    Session.config.engine.create_session(session_id)
+    Kemal::Session.config.engine.create_session(session_id)
 
     cookies = HTTP::Cookies.new
-    cookies << HTTP::Cookie.new(Session.config.cookie_name, Session.encode(session_id))
+    cookies << HTTP::Cookie.new(Kemal::Session.config.cookie_name, Kemal::Session.encode(session_id))
     cookies.add_request_headers(headers)
   end
 
@@ -43,7 +43,7 @@ class User
     id: Int32,
     name: String
   )
-  include Session::StorableObject
+  include Kemal::Session::StorableObject
 
   def initialize(@id : Int32, @name : String)
   end
@@ -60,7 +60,7 @@ class UserTestSerialization
     raise Exception.new("calling to_json")
   end
 
-  include Session::StorableObject
+  include Kemal::Session::StorableObject
 end
 
 class UserTestDeserialization
@@ -74,14 +74,14 @@ class UserTestDeserialization
     json.number(@id)
   end
 
-  include Session::StorableObject
+  include Kemal::Session::StorableObject
 end
 
 class First
   JSON.mapping({
-    id: Int64
+    id: Int64,
   })
-  include Session::StorableObject
+  include Kemal::Session::StorableObject
 
   def initialize(@id : Int64); end
 
@@ -92,9 +92,9 @@ end
 
 class Second
   JSON.mapping({
-    id: Int64
+    id: Int64,
   })
-  include Session::StorableObject
+  include Kemal::Session::StorableObject
 
   def initialize(@id : Int64); end
 

@@ -4,10 +4,10 @@
 #   env.session.int?("hi")
 # end
 class HTTP::Server::Context
-  property! session : Session
+  property! session : Kemal::Session
 
   def session
-    @session ||= Session.new(self)
+    @session ||= Kemal::Session.new(self)
     @session.not_nil!
   end
 end

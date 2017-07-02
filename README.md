@@ -165,14 +165,6 @@ It is also possible to manage other users' sessions if you want to build an admi
 **You should be very careful with those, though.** These functions enable you to access and modify all information that is stored in all sessions, also in those that do not belong to the current user. So take extra care of security when using them.
 Additionally, depending on the engine used and on how many active sessions there are, `Kemal::Session.all` and `Kemal::Session.each` might be memory intensive as they have to load all the sessions into memory at once, in the worst case. It is best to check/ask how your engine handles that when in doubt.
 
-## Features already implemented
-
-- Storing of Int32, String, Float64 and Bool values
-- Garbage collector that removes expired sessions from the server
-- Memory engine
-- File engine
-- Manage sessions: Session.all, Session.remove(id), Session.get(id)
-
 ## Compatible Engines
 - [kemal-session-redis](https://github.com/neovintage/kemal-session-redis): Redis based session storage engine.
 

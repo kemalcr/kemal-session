@@ -9,18 +9,11 @@ class Session
     @secret : String
     @secure : Bool
     @domain : String?
-    @path   : String
+    @path : String
     property timeout, gc_interval, cookie_name, engine, secret, secure, domain, path
-
-    @engine_set = false
-
-    def engine_set?
-      @engine_set
-    end
 
     def engine=(e : Engine)
       @engine = e
-      @engine_set = true
     end
 
     def initialize
@@ -31,11 +24,7 @@ class Session
       @secret = ""
       @secure = false
       @domain = nil
-      @path   = "/"
-    end
-
-    def set_default_engine
-      Session.config.engine = MemoryEngine.new
+      @path = "/"
     end
   end # Config
 

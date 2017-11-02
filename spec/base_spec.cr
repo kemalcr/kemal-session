@@ -253,7 +253,7 @@ describe "Session" do
       Kemal::Session.destroy_all
       Kemal::Session.all.size.should eq(0)
       3.times do
-        Kemal::Session.new(create_context(SecureRandom.hex))
+        Kemal::Session.new(create_context(Random::Secure.hex))
       end
       Kemal::Session.all.size.should eq(3)
     end
@@ -263,7 +263,7 @@ describe "Session" do
     it "should iterate through all sessions" do
       Kemal::Session.destroy_all
       5.times do
-        Kemal::Session.new(create_context(SecureRandom.hex))
+        Kemal::Session.new(create_context(Random::Secure.hex))
       end
       count = 0
       Kemal::Session.each do |session|

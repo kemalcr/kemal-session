@@ -10,8 +10,7 @@ Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => 
 Spec.before_each do
   if Kemal::Session.config.engine.class == Kemal::Session::FileEngine
     sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
-    Dir.foreach(sessions_path) do |file|
-      next if file == "." || file == ".."
+    Dir.each_child(sessions_path) do |file|
       File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
     end
     Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache

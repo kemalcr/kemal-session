@@ -1,5 +1,5 @@
 require "uri"
-require "secure_random"
+require "random/secure"
 require "openssl/hmac"
 require "openssl/sha1"
 
@@ -23,7 +23,7 @@ module Kemal
       end
 
       if id.nil? || !valid
-        id = SecureRandom.hex
+        id = Random::Secure.hex
         Kemal::Session.config.engine.create_session(id)
       end
 
@@ -51,7 +51,7 @@ module Kemal
     def reset
       destroy
       if context = @context
-        @id = SecureRandom.hex
+        @id = Random::Secure.hex
         Kemal::Session.config.engine.create_session(@id)
         context.response.cookies << self.class.create_cookie(@id)
       end

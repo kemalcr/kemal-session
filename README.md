@@ -140,7 +140,7 @@ You can also write your own engine if you like. Take a look at the [wiki page](h
 #### Creating a new `secret`
 
 ```bash
-crystal eval 'require "secure_random"; puts SecureRandom.hex(64)'
+crystal eval 'require "random/secure"; puts Random::Secure.hex(64)'
 ```
 
 Once this has been generated, it's very important that you keep this in a safe

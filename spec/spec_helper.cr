@@ -3,10 +3,10 @@ require "json"
 require "../src/kemal-session"
 require "file_utils"
 
-SESSION_ID = SecureRandom.hex
+SESSION_ID = Random::Secure.hex
 
 def create_new_session
-  create_context(SecureRandom.hex)
+  create_context(Random::Secure.hex)
 end
 
 def create_context(session_id : String)

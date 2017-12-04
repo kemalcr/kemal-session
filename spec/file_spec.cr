@@ -10,8 +10,7 @@ Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => 
 Spec.before_each do
   if Kemal::Session.config.engine.class == Kemal::Session::FileEngine
     sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
-    Dir.foreach(sessions_path) do |file|
-      next if file == "." || file == ".."
+    Dir.each_child(sessions_path) do |file|
       File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
     end
     Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
@@ -258,7 +257,7 @@ describe "Session::FileEngine" do
 
   describe "#destroy_all" do
     it "should remove all sessions in filesystem" do
-      5.times { Kemal::Session.new(create_context(SecureRandom.hex)) }
+      5.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
       arr = Kemal::Session.all
       arr.size.should eq(5)
       Kemal::Session.destroy_all
@@ -298,7 +297,7 @@ describe "Session::FileEngine" do
     end
 
     it "should return an array of Sessions" do
-      3.times { Kemal::Session.new(create_context(SecureRandom.hex)) }
+      3.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
       arr = Kemal::Session.all
       arr.is_a?(Array).should be_true
       arr.size.should eq(3)
@@ -307,7 +306,7 @@ describe "Session::FileEngine" do
 
   describe "#each" do
     it "should iterate over all sessions" do
-      5.times { Kemal::Session.new(create_context(SecureRandom.hex)) }
+      5.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
       count = 0
       Kemal::Session.each do |session|
         count = count + 1

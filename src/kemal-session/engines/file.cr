@@ -67,7 +67,7 @@ module Kemal
       end
 
       def run_gc
-        Dir.foreach(@sessions_dir) do |f|
+        Dir.each_child(@sessions_dir) do |f|
           full_path = @sessions_dir + f
           if File.file? full_path
             age = Time.utc_now - File.stat(full_path).mtime # mtime is always saved in utc
@@ -136,7 +136,7 @@ module Kemal
       end
 
       def destroy_all_sessions
-        Dir.foreach(@sessions_dir) do |f|
+        Dir.each_child(@sessions_dir) do |f|
           full_path = @sessions_dir + f
           if File.file? full_path
             File.delete full_path
@@ -155,7 +155,7 @@ module Kemal
       end
 
       def each_session
-        Dir.foreach(@sessions_dir) do |f|
+        Dir.each_child(@sessions_dir) do |f|
           full_path = @sessions_dir + f
           if File.file? full_path
             yield Session.new(File.basename(f, ".json"))

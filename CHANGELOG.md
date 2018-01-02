@@ -1,13 +1,17 @@
+# 0.9.0 (02-10-2018)
+
+- Crystal 0.24.1 support 🎉
+
 # 0.6.0 (01-01-2017)
 
 This is a major release which adds `StoreableObject`. Big thanks to @neovintage :+1
 
 ### StorableObject
 
-`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Float64, String, Bool). 
-Any object that you want to save to session storage needs to be a subclass of `Session::StorableObject`. 
-The subclass needs to define two different methods. First, a class method to deserialize the object from a String, called `unserialize`. The 
-second method, is an instance method called `serialize`. `serialize` will take the object and turn it into a String for the session storage engine to 
+`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Float64, String, Bool).
+Any object that you want to save to session storage needs to be a subclass of `Session::StorableObject`.
+The subclass needs to define two different methods. First, a class method to deserialize the object from a String, called `unserialize`. The
+second method, is an instance method called `serialize`. `serialize` will take the object and turn it into a String for the session storage engine to
 handle. Here's an example implementation:
 
 ```crystal
@@ -27,7 +31,7 @@ class UserStorableObject < Session::StorableObject
 end
 ```
 
-Once a `StorableObject` subclass has been defined, you can save that in session storage just like the base types. Here's an example using 
+Once a `StorableObject` subclass has been defined, you can save that in session storage just like the base types. Here's an example using
 the `UserStorableObject` implementation:
 
 ```crystal
@@ -50,7 +54,7 @@ or advice, check with the underlying session storage implementation.
 
 # 0.5.0 (22-12-2016)
 
-This is a major release which adds Session administration capabilities (check #7 for more info). Big thanks to @neovintage and @Thyra 🎉 
+This is a major release which adds Session administration capabilities (check #7 for more info). Big thanks to @neovintage and @Thyra 🎉
 
 - `#get` to get a session with the given `session_id`.
 - `#all` to get every saved sessions.

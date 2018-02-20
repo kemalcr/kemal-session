@@ -135,7 +135,7 @@ The engine you use has a huge impact on performance and can enable you to share 
 ```crystal
 Kemal::Session.config.engine = Kemal::Session::FileEngine.new({sessions_dir: "/var/foobar/sessions/"})
 ```
-You can also write your own engine if you like. Take a look at the [wiki page](https://github.com/kemalcr/kemal-session/wiki/Creating-your-own-engine). If you think it might also be helpful for others just let me know about it and I will include it in a list of known engines or something.
+You can also write your own engine if you like. Take a look at the [wiki page](https://github.com/kemalcr/kemal-session/wiki/Creating-your-session-engine). If you think it might also be helpful for others just let me know about it and I will include it in a list of known engines or something.
 
 #### Creating a new `secret`
 

@@ -42,11 +42,11 @@ module Kemal
         end
 
         define_storage({
-          int: Int32,
+          int:    Int32,
           bigint: Int64,
-          string:  String,
-          float:   Float64,
-          bool: Bool,
+          string: String,
+          float:  Float64,
+          bool:   Bool,
           object: Session::StorableObject::StorableObjectContainer,
         })
       end
@@ -197,11 +197,11 @@ module Kemal
       end
 
       define_delegators({
-        int: Int32,
+        int:    Int32,
         bigint: Int64,
-        string:  String,
-        float:   Float64,
-        bool: Bool,
+        string: String,
+        float:  Float64,
+        bool:   Bool,
         object: Session::StorableObject::StorableObjectContainer,
       })
     end

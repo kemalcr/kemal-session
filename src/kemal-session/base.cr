@@ -138,13 +138,13 @@ module Kemal
         error_message = <<-ERROR
               Please set your session secret within your config via
 
-              Session.config do |config|
-                Session.config.secret = \"my_super_secret\"
+              Kemal::Session.config do |config|
+                config.secret = \"my_super_secret\"
               end
 
               or
 
-              Session.config.secret = \"my_super_secret\"
+              Kemal::Session.config.secret = \"my_super_secret\"
               ERROR
         super error_message
       end

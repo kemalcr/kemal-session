@@ -1,24 +1,38 @@
 require "./spec_helper"
 require "file_utils"
+require "tempfile"
+require "random/secure"
+
+# Set the folder to use for all of these tests
+#
+SESSION_DIR = File.join(Tempfile.dirname, Random::Secure.hex) + "/"
+Dir.mkdir(SESSION_DIR)
 
 # Set the engine for all of these tests
 #
-SESSION_DIR = "./spec/assets/sessions/"
 Kemal::Session.config.secret = "super-awesome-secret"
-Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => "./spec/assets/sessions/"})
+Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => SESSION_DIR})
 
 Spec.before_each do
   if Kemal::Session.config.engine.class == Kemal::Session::FileEngine
-    sessions_path = File.join(Dir.current, "spec", "assets", "sessions")
-    Dir.each_child(sessions_path) do |file|
-      File.delete File.join(Dir.current, "spec", "assets", "sessions", file)
-    end
+    Dir.mkdir(SESSION_DIR) unless Dir.exists?(SESSION_DIR)
     Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
   end
 end
 
+Spec.after_each do
+  if Kemal::Session.config.engine.class == Kemal::Session::FileEngine && Dir.exists?(SESSION_DIR)
+    FileUtils.rm_r(SESSION_DIR) if Dir.exists?(SESSION_DIR)
+    Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
+  end
+end
+
+def get_file_session_filename(session_id)
+  File.join(SESSION_DIR, "#{session_id}.json")
+end
+
 def get_file_session_contents(session_id)
-  File.read(File.join(Dir.current, "spec", "assets", "sessions", "#{session_id}.json"))
+  File.read(get_file_session_filename(session_id))
 end
 
 def should_be_empty_file_session(session_id)
@@ -207,12 +221,12 @@ describe "Session::FileEngine" do
       get_file_session_contents(SESSION_ID).should \
         eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"type\":\"User\",\"object\":{\"id\":123,\"name\":\"charlie\"}}}}")
 
-      Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
+    Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
 
-      session = Kemal::Session.get(SESSION_ID).not_nil!
-      new_u = session.object("user").as(User)
-      new_u.id.should eq(123)
-      new_u.name.should eq("charlie")
+    session = Kemal::Session.get(SESSION_ID).not_nil!
+    new_u = session.object("user").as(User)
+    new_u.id.should eq(123)
+    new_u.name.should eq("charlie")
     end
   end
 

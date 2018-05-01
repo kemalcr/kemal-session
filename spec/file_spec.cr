@@ -221,12 +221,12 @@ describe "Session::FileEngine" do
       get_file_session_contents(SESSION_ID).should \
         eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"type\":\"User\",\"object\":{\"id\":123,\"name\":\"charlie\"}}}}")
 
-    Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
+      Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
 
-    session = Kemal::Session.get(SESSION_ID).not_nil!
-    new_u = session.object("user").as(User)
-    new_u.id.should eq(123)
-    new_u.name.should eq("charlie")
+      session = Kemal::Session.get(SESSION_ID).not_nil!
+      new_u = session.object("user").as(User)
+      new_u.id.should eq(123)
+      new_u.name.should eq("charlie")
     end
   end
 

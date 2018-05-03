@@ -221,12 +221,12 @@ describe "Session::FileEngine" do
       get_file_session_contents(SESSION_ID).should \
         eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"type\":\"User\",\"object\":{\"id\":123,\"name\":\"charlie\"}}}}")
 
-      Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
+    Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
 
-      session = Kemal::Session.get(SESSION_ID).not_nil!
-      new_u = session.object("user").as(User)
-      new_u.id.should eq(123)
-      new_u.name.should eq("charlie")
+    session = Kemal::Session.get(SESSION_ID).not_nil!
+    new_u = session.object("user").as(User)
+    new_u.id.should eq(123)
+    new_u.name.should eq("charlie")
     end
   end
 
@@ -269,13 +269,47 @@ describe "Session::FileEngine" do
     end
   end
 
+  describe "#run_gc" do
+    it "should remove all sessions that are older than gc config" do
+      2.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      Kemal::Session.all.size.should eq(2)
+
+      # should remove nothing, as the gc > now
+      Kemal::Session.config.engine.run_gc
+      Kemal::Session.all.size.should eq(2)
+
+      # set the timeout to < when we created it
+      Kemal::Session.config.timeout = 0.seconds
+      Kemal::Session.config.engine.run_gc
+      Kemal::Session.all.size.should eq(0)
+    end
+  end
+
   describe "#destroy_all" do
     it "should remove all sessions in filesystem" do
       5.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
-      arr = Kemal::Session.all
-      arr.size.should eq(5)
+      Kemal::Session.all.size.should eq(5)
+
       Kemal::Session.destroy_all
       Kemal::Session.all.size.should eq(0)
+    end
+
+    it "should not remove things that are not 'session files'" do
+      f = File.join(SESSION_DIR, ".gitkeep")
+      arr = Kemal::Session.all
+      arr.size.should eq(0)
+
+      File.write(f, "testing")
+
+      # Should still be zero.
+      arr = Kemal::Session.all
+      arr.size.should eq(0)
+
+      # Shouldn't remove file
+      Kemal::Session.destroy_all
+      Kemal::Session.all.size.should eq(0)
+      File.file?(f).should be_true
+      File.delete(f)
     end
   end
 
@@ -326,6 +360,19 @@ describe "Session::FileEngine" do
         count = count + 1
       end
       count.should eq(5)
+    end
+
+    it "should not see things that are not 'session files'" do
+      f = File.join(SESSION_DIR, ".gitkeep")
+      File.write(f, "testing")
+
+      count = 0
+      Kemal::Session.each do |session|
+        count = count + 1
+      end
+      count.should eq(0)
+
+      File.delete(f)
     end
   end
 end

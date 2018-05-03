@@ -42,11 +42,11 @@ module Kemal
         end
 
         define_storage({
-          int: Int32,
+          int:    Int32,
           bigint: Int64,
-          string:  String,
-          float:   Float64,
-          bool: Bool,
+          string: String,
+          float:  Float64,
+          bool:   Bool,
           object: Session::StorableObject::StorableObjectContainer,
         })
       end
@@ -67,12 +67,10 @@ module Kemal
       end
 
       def run_gc
-        Dir.each_child(@sessions_dir) do |f|
-          full_path = @sessions_dir + f
-          if File.file? full_path
-            age = Time.utc_now - File.stat(full_path).mtime # mtime is always saved in utc
-            File.delete full_path if age.total_seconds > Session.config.timeout.total_seconds
-          end
+        each_session do |session|
+          full_path = session_filename(session.id)
+          age = Time.utc_now - File.stat(full_path).mtime # mtime is always saved in utc
+          session.destroy if age.total_seconds > Session.config.timeout.total_seconds
         end
       end
 
@@ -90,7 +88,7 @@ module Kemal
         if (@cached_session_read_time.epoch / 60) < (Time.utc_now.epoch / 60)
           @cached_session_read_time = Time.utc_now
           begin
-            File.utime(Time.now, Time.now, @sessions_dir + session_id + ".json")
+            File.utime(Time.now, Time.now, session_filename(session_id))
           rescue ex
             puts "Kemal-session cannot update time of a sesssion file. This may not be possible on your current file system"
           end
@@ -99,25 +97,26 @@ module Kemal
       end
 
       def save_cache
-        File.write(@sessions_dir + @cached_session_id + ".json", @cache.to_json)
+        File.write(session_filename(@cached_session_id), @cache.to_json)
       end
 
       def read_or_create_storage_instance(session_id : String) : StorageInstance
-        if File.file? @sessions_dir + session_id + ".json"
-          @cached_session_read_time = File.stat(@sessions_dir + session_id + ".json").mtime
-          json = File.read(@sessions_dir + session_id + ".json")
+        if session_exists?(session_id)
+          f = session_filename(session_id)
+          @cached_session_read_time = File.stat(f).mtime
+          json = File.read(f)
           if json && json.size > 0
             return StorageInstance.from_json(json)
           end
         end
         instance = StorageInstance.new
         @cached_session_read_time = Time.utc_now
-        File.write(@sessions_dir + session_id + ".json", instance.to_json)
+        File.write(session_filename(session_id), instance.to_json)
         return instance
       end
 
       def session_exists?(session_id : String) : Bool
-        File.file? @sessions_dir + session_id + ".json"
+        File.file?(session_filename(session_id))
       end
 
       def create_session(session_id : String)
@@ -131,16 +130,13 @@ module Kemal
 
       def destroy_session(session_id : String)
         if session_exists?(session_id)
-          File.delete(@sessions_dir + session_id + ".json")
+          File.delete(session_filename(session_id))
         end
       end
 
       def destroy_all_sessions
-        Dir.each_child(@sessions_dir) do |f|
-          full_path = @sessions_dir + f
-          if File.file? full_path
-            File.delete full_path
-          end
+        each_session do |session|
+          session.destroy
         end
       end
 
@@ -156,11 +152,22 @@ module Kemal
 
       def each_session
         Dir.each_child(@sessions_dir) do |f|
-          full_path = @sessions_dir + f
-          if File.file? full_path
+          full_path = File.join(@sessions_dir, f)
+          if session_file?(f)
             yield Session.new(File.basename(f, ".json"))
           end
         end
+      end
+
+      def session_filename(session_id : String)
+        File.join(@sessions_dir, session_id + ".json")
+      end
+
+      # Note, this is only checking if it's _probably_ a session file.
+      # tldr, don't store json in the session folder or it'll get removed
+      # eventually
+      def session_file?(f : String)
+        File.exists?(File.join(@sessions_dir, f)) && f[-5..-1] == ".json"
       end
 
       # Delegating int(k,v), int?(k) etc. from Engine to StorageInstance
@@ -197,11 +204,11 @@ module Kemal
       end
 
       define_delegators({
-        int: Int32,
+        int:    Int32,
         bigint: Int64,
-        string:  String,
-        float:   Float64,
-        bool: Bool,
+        string: String,
+        float:  Float64,
+        bool:   Bool,
         object: Session::StorableObject::StorableObjectContainer,
       })
     end

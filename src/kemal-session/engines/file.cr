@@ -153,7 +153,7 @@ module Kemal
       def each_session
         Dir.each_child(@sessions_dir) do |f|
           full_path = File.join(@sessions_dir, f)
-          if is_session_file?(f)
+          if session_file?(f)
             yield Session.new(File.basename(f, ".json"))
           end
         end
@@ -166,7 +166,7 @@ module Kemal
       # Note, this is only checking if it's _probably_ a session file.
       # tldr, don't store json in the session folder or it'll get removed
       # eventually
-      def is_session_file?(f : String)
+      def session_file?(f : String)
         File.exists?(File.join(@sessions_dir, f)) && f[-5..-1] == ".json"
       end
 

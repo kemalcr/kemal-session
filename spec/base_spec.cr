@@ -292,7 +292,7 @@ describe "Session" do
 
     it "should raise SecretRequiredException if secret is not set" do
       Kemal::Session.config.secret = ""
-      expect_raises("Kemal::Session::SecretRequiredException") do
+      expect_raises(Kemal::Session::SecretRequiredException) do
         context = create_context("")
         session = Kemal::Session.new(context)
       end

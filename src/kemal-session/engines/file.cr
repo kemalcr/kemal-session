@@ -69,7 +69,7 @@ module Kemal
       def run_gc
         each_session do |session|
           full_path = session_filename(session.id)
-          age = Time.utc_now - File.stat(full_path).mtime # mtime is always saved in utc
+          age = Time.utc_now - File.info(full_path).modification_time # mtime is always saved in utc
           session.destroy if age.total_seconds > Session.config.timeout.total_seconds
         end
       end
@@ -103,7 +103,7 @@ module Kemal
       def read_or_create_storage_instance(session_id : String) : StorageInstance
         if session_exists?(session_id)
           f = session_filename(session_id)
-          @cached_session_read_time = File.stat(f).mtime
+          @cached_session_read_time = File.info(f).modification_time
           json = File.read(f)
           if json && json.size > 0
             return StorageInstance.from_json(json)

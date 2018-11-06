@@ -85,7 +85,7 @@ module Kemal
       end
 
       def is_in_cache?(session_id : String) : Bool
-        if (@cached_session_read_time.epoch / 60) < (Time.utc_now.epoch / 60)
+        if (@cached_session_read_time.to_unix / 60) < (Time.utc_now.to_unix / 60)
           @cached_session_read_time = Time.utc_now
           begin
             File.utime(Time.now, Time.now, session_filename(session_id))

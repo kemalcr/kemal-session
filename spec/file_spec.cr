@@ -1,11 +1,10 @@
 require "./spec_helper"
 require "file_utils"
-require "tempfile"
 require "random/secure"
 
 # Set the folder to use for all of these tests
 #
-SESSION_DIR = File.join(Tempfile.dirname, Random::Secure.hex) + "/"
+SESSION_DIR = File.join(Dir.tempdir, Random::Secure.hex) + "/"
 Dir.mkdir(SESSION_DIR)
 
 # Set the engine for all of these tests

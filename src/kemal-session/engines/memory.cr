@@ -18,26 +18,26 @@ module Kemal
 
         {% for name, type in vars %}
           @{{name.id}}s = Hash(String, {{type}}).new
-          @last_access_at = Time.new.epoch_ms
+          @last_access_at = Time.new.to_unix_ms
           getter {{name.id}}s
 
           def {{name.id}}(k : String) : {{type}}
-            @last_access_at = Time.new.epoch_ms
+            @last_access_at = Time.new.to_unix_ms
             return @{{name.id}}s[k]
           end
 
           def {{name.id}}?(k : String) : {{type}}?
-            @last_access_at = Time.new.epoch_ms
+            @last_access_at = Time.new.to_unix_ms
             return @{{name.id}}s[k]?
           end
 
           def {{name.id}}(k : String, v : {{type}})
-            @last_access_at = Time.new.epoch_ms
+            @last_access_at = Time.new.to_unix_ms
             @{{name.id}}s[k] = v
           end
 
           def delete_{{name.id}}(k : String)
-            @last_access_at = Time.new.epoch_ms
+            @last_access_at = Time.new.to_unix_ms
             @{{name.id}}s.delete(k) if @{{name.id}}s.has_key?(k)
           end
         {% end %}
@@ -66,7 +66,7 @@ module Kemal
       end
 
       def run_gc
-        before = (Time.now - Kemal::Session.config.timeout.as(Time::Span)).epoch_ms
+        before = (Time.now - Kemal::Session.config.timeout.as(Time::Span)).to_unix_ms
         @store.delete_if do |id, entry|
           last_access_at = Int64.from_json(entry, root: "last_access_at")
           last_access_at < before

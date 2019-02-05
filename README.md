@@ -168,6 +168,7 @@ Additionally, depending on the engine used and on how many active sessions there
 ## Compatible Engines
 - [kemal-session-redis](https://github.com/neovintage/kemal-session-redis): Redis based session storage engine.
 - [kemal-session-mysql](https://github.com/crisward/kemal-session-mysql): Mysql based session storage engine.
+- [kemal-session-rethinkdb](https://github.com/kingsleyh/kemal-session-rethinkdb) RethinkDB based session storage engine.
 
 ### Thanks
 

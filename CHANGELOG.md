@@ -1,3 +1,8 @@
+# 0.11.1 (09-02-2019)
+
+- Crystal 0.27.2 support 🎉
+- Kemal 0.25.2 support 🎉
+
 # 0.11.0 (06-11-2018)
 
 - Crystal 0.27.0 support 🎉

@@ -14,7 +14,7 @@ module Kemal
       id = ctx.request.cookies[Session.config.cookie_name]?.try &.value
       valid = false
       if id
-        parts = URI.unescape(id).split("--")
+        parts = URI.decode(id).split("--")
         if parts.size == 2
           new_val = self.class.sign_value(parts[0])
           id = parts[0]

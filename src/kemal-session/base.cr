@@ -130,6 +130,7 @@ module Kemal
         secure: Session.config.secure,
         path: Session.config.path,
         domain: Session.config.domain,
+        samesite: Session.config.samesite
       )
     end
 

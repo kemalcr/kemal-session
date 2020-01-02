@@ -274,6 +274,20 @@ describe "Session" do
     end
   end
 
+  describe "cookie" do
+    it "should create a cookie with the samesite set to strict" do
+       Kemal::Session.config do |config|
+        config.cookie_name = "woops"
+        config.samesite = HTTP::Cookie::SameSite::Strict
+      end
+
+      context = create_cookie_context(SESSION_ID, Kemal::Session.config)
+      session = Kemal::Session.new(context)
+      cookie = context.response.cookies[Kemal::Session.config.cookie_name]
+      cookie.samesite.should eq(HTTP::Cookie::SameSite::Strict)
+    end
+  end
+
   describe "signed cookies" do
     it "should use the same session_id" do
       context = create_context(SESSION_ID)

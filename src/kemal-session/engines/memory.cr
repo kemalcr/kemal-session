@@ -18,26 +18,26 @@ module Kemal
 
         {% for name, type in vars %}
           @{{name.id}}s = Hash(String, {{type}}).new
-          @last_access_at = Time.new.to_unix_ms
+          @last_access_at = Time.utc.to_unix_ms
           getter {{name.id}}s
 
           def {{name.id}}(k : String) : {{type}}
-            @last_access_at = Time.new.to_unix_ms
+            @last_access_at = Time.utc.to_unix_ms
             return @{{name.id}}s[k]
           end
 
           def {{name.id}}?(k : String) : {{type}}?
-            @last_access_at = Time.new.to_unix_ms
+            @last_access_at = Time.utc.to_unix_ms
             return @{{name.id}}s[k]?
           end
 
           def {{name.id}}(k : String, v : {{type}})
-            @last_access_at = Time.new.to_unix_ms
+            @last_access_at = Time.utc.to_unix_ms
             @{{name.id}}s[k] = v
           end
 
           def delete_{{name.id}}(k : String)
-            @last_access_at = Time.new.to_unix_ms
+            @last_access_at = Time.utc.to_unix_ms
             @{{name.id}}s.delete(k) if @{{name.id}}s.has_key?(k)
           end
         {% end %}
@@ -50,11 +50,11 @@ module Kemal
       end
 
         define_storage({
-          int: Int32,
+          int:    Int32,
           bigint: Int64,
-          string:  String,
-          float:   Float64,
-          bool: Bool,
+          string: String,
+          float:  Float64,
+          bool:   Bool,
           object: Kemal::Session::StorableObject::StorableObjectContainer,
         })
       end
@@ -66,7 +66,7 @@ module Kemal
       end
 
       def run_gc
-        before = (Time.now - Kemal::Session.config.timeout.as(Time::Span)).to_unix_ms
+        before = (Time.local - Kemal::Session.config.timeout.as(Time::Span)).to_unix_ms
         @store.delete_if do |id, entry|
           last_access_at = Int64.from_json(entry, root: "last_access_at")
           last_access_at < before
@@ -74,7 +74,7 @@ module Kemal
         sleep Kemal::Session.config.gc_interval
       end
 
-      def all_sessions
+      def all_sessions : Array(Session)
         @store.each_with_object([] of Session) do |vals, arr|
           arr << Kemal::Session.new(vals.first)
         end
@@ -90,7 +90,7 @@ module Kemal
         end
       end
 
-      def get_session(session_id : String)
+      def get_session(session_id : String) : Session?
         return nil if !@store.has_key?(session_id)
         Session.new(session_id)
       end
@@ -148,11 +148,11 @@ module Kemal
     end
 
       define_delegators({
-        int: Int32,
+        int:    Int32,
         bigint: Int64,
-        string:  String,
-        float:   Float64,
-        bool: Bool,
+        string: String,
+        float:  Float64,
+        bool:   Bool,
         object: Session::StorableObject::StorableObjectContainer,
       })
     end

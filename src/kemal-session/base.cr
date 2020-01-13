@@ -125,7 +125,7 @@ module Kemal
       HTTP::Cookie.new(
         name: Session.config.cookie_name,
         value: self.encode(session_id),
-        expires: Time.now.to_utc + Session.config.timeout,
+        expires: Time.utc + Session.config.timeout,
         http_only: true,
         secure: Session.config.secure,
         path: Session.config.path,

@@ -7,11 +7,6 @@ require "random/secure"
 SESSION_DIR = File.join(Dir.tempdir, Random::Secure.hex) + "/"
 Dir.mkdir(SESSION_DIR)
 
-# Set the engine for all of these tests
-#
-Kemal::Session.config.secret = "super-awesome-secret"
-Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => SESSION_DIR})
-
 Spec.before_each do
   if Kemal::Session.config.engine.class == Kemal::Session::FileEngine
     Dir.mkdir(SESSION_DIR) unless Dir.exists?(SESSION_DIR)
@@ -40,6 +35,11 @@ def should_be_empty_file_session(session_id)
 end
 
 describe "Session::FileEngine" do
+  before_all do
+    Kemal::Session.config.secret = "super-awesome-secret"
+    Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => SESSION_DIR})
+  end
+
   describe "options" do
     describe ":sessions_dir" do
       it "raises an ArgumentError if option not passed" do
@@ -220,12 +220,12 @@ describe "Session::FileEngine" do
       get_file_session_contents(SESSION_ID).should \
         eq("{\"ints\":{},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{\"user\":{\"type\":\"User\",\"object\":{\"id\":123,\"name\":\"charlie\"}}}}")
 
-    Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
+      Kemal::Session.config.engine.as(Kemal::Session::FileEngine).clear_cache
 
-    session = Kemal::Session.get(SESSION_ID).not_nil!
-    new_u = session.object("user").as(User)
-    new_u.id.should eq(123)
-    new_u.name.should eq("charlie")
+      session = Kemal::Session.get(SESSION_ID).not_nil!
+      new_u = session.object("user").as(User)
+      new_u.id.should eq(123)
+      new_u.name.should eq("charlie")
     end
   end
 

@@ -1,12 +1,11 @@
 require "./spec_helper"
 
-# Config Options
-#
-Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
-Kemal::Session.config.secret = "kemal_rocks"
-SIGNED_SESSION = "#{SESSION_ID}--#{Kemal::Session.sign_value(SESSION_ID)}"
-
 describe "Session" do
+  before_all do
+    Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
+    Kemal::Session.config.secret = "kemal_rocks"
+  end
+
   describe ".start" do
     it "returns a Session instance" do
       typeof(Kemal::Session.new(create_context(SESSION_ID))).should eq Kemal::Session
@@ -275,18 +274,20 @@ describe "Session" do
   end
 
   describe "signed cookies" do
+    signed_session = "#{SESSION_ID}--#{Kemal::Session.sign_value(SESSION_ID)}"
+
     it "should use the same session_id" do
       context = create_context(SESSION_ID)
       session = Kemal::Session.new(context)
-      context.response.cookies[Kemal::Session.config.cookie_name].value.should eq(SIGNED_SESSION)
+      context.response.cookies[Kemal::Session.config.cookie_name].value.should eq(signed_session)
     end
 
     it "should return a new session if signed token has been tampered" do
-      tampered_session = "123" + SIGNED_SESSION[3..-1]
+      tampered_session = "123" + signed_session[3..-1]
       context = create_context(tampered_session)
       session = Kemal::Session.new(context)
       name = Kemal::Session.config.cookie_name
-      context.response.cookies[name].value.should_not eq(SIGNED_SESSION)
+      context.response.cookies[name].value.should_not eq(signed_session)
       context.response.cookies[name].value.should_not eq(tampered_session)
     end
 

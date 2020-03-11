@@ -5,6 +5,9 @@ require "file_utils"
 
 SESSION_ID = Random::Secure.hex
 
+Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
+Kemal::Session.config.secret = "kemal_rocks"
+
 def create_new_session
   create_context(Random::Secure.hex)
 end

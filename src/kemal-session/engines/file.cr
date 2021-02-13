@@ -4,13 +4,8 @@ module Kemal
   class Session
     class FileEngine < Engine
       class StorageInstance
+        include JSON::Serializable
         macro define_storage(vars)
-          JSON.mapping({
-            {% for name, type in vars %}
-              {{name.id}}s: Hash(String, {{type}}),
-            {% end %}
-          })
-
           {% for name, type in vars %}
             @{{name.id}}s = Hash(String, {{type}}).new
             getter {{name.id}}s

@@ -1,6 +1,10 @@
+# 0.13.0 (14-02-2021)
+
+- Crystal 0.36.0 support :tada:
+
 # 0.12.1 (16-05-2020)
 
-- Crystal 0.34.0 support
+- Crystal 0.34.0 support :tada:
 
 # 0.11.1 (09-02-2019)
 

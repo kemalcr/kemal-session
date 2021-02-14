@@ -4,17 +4,10 @@ module Kemal
   class Session
     class MemoryEngine < Engine
       class StorageInstance
+        include JSON::Serializable
         macro define_storage(vars)
         getter! id : String
         property! last_access_at : Int64
-
-        JSON.mapping({
-          {% for name, type in vars %}
-            {{name.id}}s: Hash(String, {{type}}),
-          {% end %}
-          last_access_at: Int64,
-          id: String,
-        })
 
         {% for name, type in vars %}
           @{{name.id}}s = Hash(String, {{type}}).new

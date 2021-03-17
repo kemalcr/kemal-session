@@ -1,3 +1,8 @@
+# 1.0.0 (?-03-2021)
+
+- Crystal 1.0.0 support :tada:
+- Kemal 1.0.0 support :tada:
+- Secure cookies with `samesite` [#96](https://github.com/kemalcr/kemal-session/pull/96). Thanks @kingsleysh :pray:
 # 0.13.0 (14-02-2021)
 
 - Crystal 0.36.0 support :tada:

@@ -30,6 +30,18 @@ def create_context(session_id : String)
   return HTTP::Server::Context.new(request, response)
 end
 
+def create_cookie_context(session_id : String, session)
+  response = HTTP::Server::Response.new(IO::Memory.new)
+  headers = HTTP::Headers.new
+
+  session.engine.create_session(session_id)
+  cookies = HTTP::Cookies.new
+  cookies << HTTP::Cookie.new(Kemal::Session.config.cookie_name, Kemal::Session.encode(session_id))
+  cookies.add_request_headers(headers)
+  request = HTTP::Request.new("GET", "/", headers)
+  return HTTP::Server::Context.new(request, response)
+end
+
 macro expect_not_raises(file = __FILE__, line = __LINE__)
   %failed = false
   begin

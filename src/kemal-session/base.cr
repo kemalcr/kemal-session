@@ -140,12 +140,12 @@ module Kemal
               Please set your session secret within your config via
 
               Kemal::Session.config do |config|
-                config.secret = \"my_super_secret\"
+                config.secret = "my_super_secret"
               end
 
               or
 
-              Kemal::Session.config.secret = \"my_super_secret\"
+              Kemal::Session.config.secret = "my_super_secret"
               ERROR
         super error_message
       end

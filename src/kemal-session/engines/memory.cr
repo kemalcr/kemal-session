@@ -5,6 +5,7 @@ module Kemal
     class MemoryEngine < Engine
       class StorageInstance
         include JSON::Serializable
+
         macro define_storage(vars)
         getter! id : String
         property! last_access_at : Int64

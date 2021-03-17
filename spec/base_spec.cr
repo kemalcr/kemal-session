@@ -275,7 +275,7 @@ describe "Session" do
 
   describe "cookie" do
     it "should create a cookie with the samesite set to strict" do
-       Kemal::Session.config do |config|
+      Kemal::Session.config do |config|
         config.cookie_name = "woops"
         config.samesite = HTTP::Cookie::SameSite::Strict
       end

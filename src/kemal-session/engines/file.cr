@@ -5,6 +5,7 @@ module Kemal
     class FileEngine < Engine
       class StorageInstance
         include JSON::Serializable
+
         macro define_storage(vars)
           {% for name, type in vars %}
             @{{name.id}}s = Hash(String, {{type}}).new

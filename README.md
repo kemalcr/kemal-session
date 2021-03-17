@@ -165,6 +165,16 @@ It is also possible to manage other users' sessions if you want to build an admi
 **You should be very careful with those, though.** These functions enable you to access and modify all information that is stored in all sessions, also in those that do not belong to the current user. So take extra care of security when using them.
 Additionally, depending on the engine used and on how many active sessions there are, `Kemal::Session.all` and `Kemal::Session.each` might be memory intensive as they have to load all the sessions into memory at once, in the worst case. It is best to check/ask how your engine handles that when in doubt.
 
+## Securing the cookies
+
+You can use the `samesite` parameter like the following
+
+```crystal
+Kemal::Session.config do |config|
+  config.samesite = HTTP::Cookie::SameSite::Strict
+end
+```
+
 ## Compatible Engines
 - [kemal-session-redis](https://github.com/neovintage/kemal-session-redis): Redis based session storage engine.
 - [kemal-session-mysql](https://github.com/crisward/kemal-session-mysql): Mysql based session storage engine.

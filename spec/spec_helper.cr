@@ -42,11 +42,10 @@ macro expect_not_raises(file = __FILE__, line = __LINE__)
 end
 
 class User
-  JSON.mapping(
-    id: Int32,
-    name: String
-  )
+  include JSON::Serializable
   include Kemal::Session::StorableObject
+
+  getter id, name
 
   def initialize(@id : Int32, @name : String)
   end
@@ -81,9 +80,7 @@ class UserTestDeserialization
 end
 
 class First
-  JSON.mapping({
-    id: Int64,
-  })
+  include JSON::Serializable
   include Kemal::Session::StorableObject
 
   def initialize(@id : Int64); end
@@ -94,9 +91,7 @@ class First
 end
 
 class Second
-  JSON.mapping({
-    id: Int64,
-  })
+  include JSON::Serializable
   include Kemal::Session::StorableObject
 
   def initialize(@id : Int64); end

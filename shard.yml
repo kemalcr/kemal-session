@@ -1,10 +1,10 @@
 name: kemal-session
-version: 0.13.0
+version: 1.0.0
 
 authors:
   - Serdar Dogruyol <dogruyolserdar@gmail.com>
 
-crystal: 0.36.0
+crystal: ">= 0.36.0"
 
 development_dependencies:
   kemal:

@@ -68,10 +68,7 @@ Here's an example implementation:
 
 ```crystal
 class UserStorableObject
-  JSON.mapping({
-    id: Int32,
-    name: String
-  })
+  include JSON::Serializable
   include Kemal::Session::StorableObject
 
   def initialize(@id : Int32, @name : String); end

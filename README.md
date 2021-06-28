@@ -71,6 +71,9 @@ class UserStorableObject
   include JSON::Serializable
   include Kemal::Session::StorableObject
 
+  property id : Int32
+  property name : String
+
   def initialize(@id : Int32, @name : String); end
 end
 ```

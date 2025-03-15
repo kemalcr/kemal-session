@@ -78,7 +78,7 @@ module Kemal
         @store[session_id] = StorageInstance.new(session_id).to_json
       end
 
-      def each_session
+      def each_session(&)
         @store.each do |key, val|
           yield Session.new(key)
         end

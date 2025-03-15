@@ -95,7 +95,7 @@ module Kemal
     # some may dump all sessions in memory before iterating through
     # them.
     #
-    def self.each
+    def self.each(&)
       Kemal::Session.config.engine.each_session do |session|
         yield session
       end

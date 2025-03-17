@@ -146,7 +146,7 @@ module Kemal
         array
       end
 
-      def each_session
+      def each_session(&)
         Dir.each_child(@sessions_dir) do |f|
           full_path = File.join(@sessions_dir, f)
           if session_file?(f)

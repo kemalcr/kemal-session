@@ -5,7 +5,7 @@ module Kemal
         spawn do
           loop do
             Session.config.engine.run_gc
-            sleep(Session.config.gc_interval.total_seconds)
+            sleep(Session.config.gc_interval)
           end
         end
       end

@@ -19,7 +19,7 @@ module Kemal
 
       macro finished
       {% if !Session::STORABLE_TYPES.empty? %}
-        alias StorableObjects = Union({{ *Session::STORABLE_TYPES }})
+        alias StorableObjects = Union({{ Session::STORABLE_TYPES.splat }})
 
         # This is a container object that allows us to define the type from
         # session storage so that we can parse everythin correctly

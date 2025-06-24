@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        crystal:
+          - latest
+          - nightly
+      fail-fast: false
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Crystal
+      uses: crystal-lang/install-crystal@v1
+      with:
+        crystal: ${{ matrix.crystal }}
+    
+    - name: Cache shards
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/shards
+        key: shards-${{ hashFiles('shard.lock') }}
+        restore-keys: shards-
+    
+    - name: Install dependencies
+      run: shards install
+    
+    - name: Create sessions directory
+      run: mkdir -p ./spec/assets/sessions/
+    
+    - name: Run tests
+      run: crystal spec
+    
+    - name: Check code formatting
+      run: crystal tool format --check

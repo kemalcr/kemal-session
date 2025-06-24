@@ -1,6 +1,6 @@
 # kemal-session
 
-[![Build Status](https://travis-ci.org/kemalcr/kemal-session.svg?branch=master)](https://travis-ci.org/kemalcr/kemal-session)
+[![Build Status](https://github.com/kemalcr/kemal-session/actions/workflows/ci.yml/badge.svg)](https://github.com/kemalcr/kemal-session/actions/workflows/ci.yml)
 
 Session support for [Kemal](https://github.com/sdogruyol/kemal) :rocket:
 

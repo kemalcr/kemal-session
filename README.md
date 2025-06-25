@@ -2,11 +2,21 @@
 
 [![Build Status](https://github.com/kemalcr/kemal-session/actions/workflows/ci.yml/badge.svg)](https://github.com/kemalcr/kemal-session/actions/workflows/ci.yml)
 
-Session support for [Kemal](https://github.com/sdogruyol/kemal) :rocket:
+> 🚀 **Powerful session management for Kemal web applications**
 
-## Installation
+Add secure, persistent session support to your [Kemal](https://github.com/sdogruyol/kemal) web applications with just a few lines of code! Perfect for user authentication, shopping carts, temporary data storage, and more.
 
-Add this to your application's `shard.yml`:
+## ✨ Why kemal-session?
+
+- 🎯 **Simple & Intuitive**: Get started in minutes with a clean, easy-to-use API
+- 🔒 **Secure by Default**: Built-in CSRF protection and signed session cookies
+- 🏎️ **Fast & Flexible**: Multiple storage engines (Memory, File, Redis, PostgreSQL, etc.)
+- 🧩 **Type-Safe**: Support for all Crystal types plus custom objects
+- 🛡️ **Production Ready**: Automatic session cleanup and security best practices
+
+## 📦 Installation
+
+Add kemal-session to your `shard.yml`:
 
 ```yaml
 dependencies:
@@ -14,234 +24,619 @@ dependencies:
     github: kemalcr/kemal-session
 ```
 
-## Usage
+Then run:
+```bash
+shards install
+```
 
-### Basic Usage
+## 🚀 Quick Start
+
+### 1. Basic Session Usage
 
 ```crystal
 require "kemal"
 require "kemal-session"
 
-get "/set" do |env|
-  env.session.int("number", rand(100)) # set the value of "number"
-  "Random number set."
+# Store data in session
+get "/login" do |env|
+  env.session.string("username", "alice")
+  env.session.int("user_id", 123)
+  "Welcome! You're now logged in."
 end
 
-get "/get" do |env|
-  num  = env.session.int("number") # get the value of "number"
-  env.session.int?("hello") # get value or nil, like []?
-  "Value of random number is #{num}."
+# Retrieve data from session
+get "/profile" do |env|
+  username = env.session.string("username")
+  user_id = env.session.int("user_id")
+  
+  "Hello #{username}! Your ID is #{user_id}"
+end
+
+# Optional values (returns nil if not found)
+get "/dashboard" do |env|
+  last_visit = env.session.string?("last_visit")
+  message = last_visit ? "Welcome back! Last visit: #{last_visit}" : "First time here!"
+  
+  env.session.string("last_visit", Time.utc.to_s)
+  message
 end
 
 Kemal.run
 ```
 
-### CSRF Protection
-
-`kemal-session` provides built-in CSRF (Cross-Site Request Forgery) protection middleware.
-
-#### Basic Usage
-
-Add the CSRF handler to your Kemal app:
-
-```crystal
-add_handler Kemal::Session::CSRF.new
-```
-
-To include the CSRF token in your HTML forms (e.g., in `.ecr` templates):
-
-```html
-<input type="hidden" name="authenticity_token" value="<%= env.session.string("csrf") %>">
-```
-
-#### Customizing CSRF Behavior
-
-You can customize the CSRF middleware by passing options:
-
-```crystal
-add_handler Kemal::Session::CSRF.new(
-  header: "X_CSRF_TOKEN",                   # Custom header name for token
-  allowed_methods: ["GET", "HEAD"],         # HTTP methods that skip CSRF check
-  allowed_routes: ["/api/health"],          # Routes that skip CSRF check
-  parameter_name: "_csrf",                  # Form field name for token
-  error: "CSRF Error",                      # Error message or handler
-  http_only: false,                         # Set CSRF cookie as HttpOnly
-  samesite: nil                             # SameSite policy for CSRF cookie
-)
-```
-
-#### Custom Error Handling
-
-You can provide a custom error handler as a proc:
-
-```crystal
-add_handler Kemal::Session::CSRF.new(
-  error: -> csrf_error_handler(HTTP::Server::Context)
-)
-
-def csrf_error_handler(env)
-  if env.request.headers["Content-Type"]? == "application/json"
-    {"error" => "CSRF error"}.to_json
-  else
-    "<html><body><h1>CSRF token missing or invalid</h1></body></html>"
-  end
-end
-```
-
-#### Notes
-
-- The CSRF token is stored in the session and must be included in all non-safe HTTP requests (e.g., POST, PUT, DELETE).
-- You can adjust which HTTP methods and routes are exempt from CSRF checks using `allowed_methods` and `allowed_routes`.
-- For APIs, you may prefer to send the token in a custom header.
-
-For more details, see the [Kemal::Session::CSRF documentation](https://github.com/kemalcr/kemal-session).
-
-### Available Types
-
-The session can save many different types but the method names differ from the type.
-
-| Type | Access Method |
-|------|---------------|
-| Int32 | `session.int` |
-| Int64 | `session.bigint` |
-| String | `session.string` |
-| Float64 | `session.float` |
-| Bool    | `session.bool` |
-| StorableObject  | `session.object` |
-
-
-You can also access the underyling hash directly by appending ``s`` to the name: ``session.ints``. This way you can use hash functions like
-```crystal
-session.ints.each do |k, v|
-  puts "#{k} => #{v}"
-end
-```
-
-**BUT:** This should only be used for reading and analyzing values, **never for changing them**. Because otherwise the session won't automatically save the changes and you may produce really weird bugs...
-
-#### StorableObject
-
-`kemal-session` has the ability to save objects to session storage. By saving objects to session storage, this opens up the ability to have more advanced data types that aren't supported by the base types (Int32, Int64, Float64, String, Bool).
-Any object that you want to save to session storage needs to include the `Kemal::Session::StorableObject` module. The class must respond to `to_json` and `from_json`. **NOTE** The module must be included after the definition of `to_json` and `from_json`.
-Otherwise the compiler will not know that those methods have been defined on the class.
-Here's an example implementation:
-
-```crystal
-class UserStorableObject
-  include JSON::Serializable
-  include Kemal::Session::StorableObject
-
-  property id : Int32
-  property name : String
-
-  def initialize(@id : Int32, @name : String); end
-end
-```
-
-Once a `Kemal::Session::StorableObject` has been defined, you can save that in session storage just like the base types. Here's an example using
-the `UserStorableObject` implementation:
+### 2. Real-World Example: Shopping Cart
 
 ```crystal
 require "kemal"
 require "kemal-session"
 
-get "/set" do |env|
-  user = UserStorableObject.new(123, "charlie")
-  env.session.object("user", user)
+# Add item to cart
+post "/cart/add" do |env|
+  product_id = env.params.body["product_id"].as(String)
+  
+  # Get existing cart or create new one
+  cart = env.session.object?("cart") || [] of String
+  cart << product_id
+  
+  env.session.object("cart", cart)
+  "Item added to cart! Total items: #{cart.size}"
 end
 
-get "/get" do |env|
-  user = env.session.object("user").as(UserStorableObject)
-  "The user stored in session is #{user.name}"
+# View cart
+get "/cart" do |env|
+  cart = env.session.object?("cart") || [] of String
+  
+  if cart.empty?
+    "Your cart is empty"
+  else
+    "Your cart: #{cart.join(", ")} (#{cart.size} items)"
+  end
+end
+
+Kemal.run
+```
+
+## 🛡️ CSRF Protection
+
+Protect your application from Cross-Site Request Forgery attacks with built-in CSRF middleware.
+
+### Basic CSRF Setup
+
+```crystal
+require "kemal"
+require "kemal-session"
+
+# Add CSRF protection
+add_handler Kemal::Session::CSRF.new
+
+get "/form" do |env|
+  csrf_token = env.session.string("csrf")
+  
+  <<-HTML
+  <form method="POST" action="/submit">
+    <input type="hidden" name="authenticity_token" value="#{csrf_token}">
+    <input type="text" name="message" placeholder="Enter message">
+    <button type="submit">Submit</button>
+  </form>
+  HTML
+end
+
+post "/submit" do |env|
+  message = env.params.body["message"]
+  "Message received: #{message}"
+end
+
+Kemal.run
+```
+
+### Advanced CSRF Configuration
+
+```crystal
+# Customize CSRF behavior
+add_handler Kemal::Session::CSRF.new(
+  header: "X-CSRF-TOKEN",                    # Custom header for AJAX requests
+  allowed_methods: ["GET", "HEAD", "OPTIONS"], # Methods that skip CSRF check
+  allowed_routes: ["/api/public"],           # Public routes that skip CSRF
+  parameter_name: "_token",                  # Custom form field name
+  error: "Invalid or missing CSRF token"     # Custom error message
+)
+```
+
+### CSRF for API Endpoints
+
+```crystal
+# Custom error handler for JSON APIs
+csrf_handler = Kemal::Session::CSRF.new(
+  error: ->(env : HTTP::Server::Context) {
+    env.response.content_type = "application/json"
+    env.response.status_code = 403
+    {"error" => "CSRF token required"}.to_json
+  }
+)
+
+add_handler csrf_handler
+```
+
+## 📊 Supported Data Types
+
+Kemal Session supports all common Crystal types with intuitive method names:
+
+| Crystal Type | Session Method | Example |
+|--------------|----------------|---------|
+| `Int32` | `session.int` | `env.session.int("count", 42)` |
+| `Int64` | `session.bigint` | `env.session.bigint("timestamp", 1234567890_i64)` |
+| `String` | `session.string` | `env.session.string("name", "Alice")` |
+| `Float64` | `session.float` | `env.session.float("price", 19.99)` |
+| `Bool` | `session.bool` | `env.session.bool("logged_in", true)` |
+| Custom Objects | `session.object` | `env.session.object("user", user_obj)` |
+
+### 🔍 Reading Values
+
+```crystal
+# Get values (raises if not found)
+count = env.session.int("count")
+name = env.session.string("username")
+
+# Get optional values (returns nil if not found)
+count = env.session.int?("count")      # returns Int32 or nil
+name = env.session.string?("username") # returns String or nil
+
+# Provide default values
+count = env.session.int?("count") || 0
+theme = env.session.string?("theme") || "light"
+```
+
+### 🗂️ Working with Collections
+
+Access the underlying hash for advanced operations (read-only):
+
+```crystal
+# Iterate through all integer values
+env.session.ints.each do |key, value|
+  puts "#{key}: #{value}"
+end
+
+# Check what string keys exist
+if env.session.strings.has_key?("username")
+  puts "User is logged in"
+end
+
+# Get all session data
+puts "Total sessions: #{env.session.strings.size}"
+```
+
+⚠️ **Important**: Only use hash access for reading. Never modify values directly through these hashes, as changes won't be persisted!
+
+## 🎯 Custom Objects (StorableObject)
+
+Store complex objects in sessions by implementing the `StorableObject` module. Perfect for user profiles, preferences, or any custom data structures.
+
+### Creating a Storable Object
+
+```crystal
+# Define your class with JSON serialization
+class User
+  include JSON::Serializable
+  include Kemal::Session::StorableObject  # Add this after JSON::Serializable
+
+  property id : Int32
+  property name : String
+  property email : String
+  property preferences : Hash(String, String)
+
+  def initialize(@id : Int32, @name : String, @email : String)
+    @preferences = {} of String => String
+  end
 end
 ```
 
-Serialization is up to you. You can define how you want that to happen so long as the resulting type is a String. If you need recommendations
-or advice, check with the underlying session storage implementation.
+### Using Storable Objects
 
-### Configuration
+```crystal
+require "kemal"
+require "kemal-session"
 
-The Session can be configured in the same way as Kemal itself:
+# Store user in session
+post "/login" do |env|
+  user = User.new(123, "Alice", "alice@example.com")
+  user.preferences["theme"] = "dark"
+  user.preferences["language"] = "en"
+  
+  env.session.object("current_user", user)
+  "Login successful!"
+end
+
+# Retrieve user from session
+get "/profile" do |env|
+  user = env.session.object("current_user").as(User)
+  
+  <<-HTML
+  <h1>Welcome, #{user.name}!</h1>
+  <p>Email: #{user.email}</p>
+  <p>Theme: #{user.preferences["theme"]?}</p>
+  HTML
+end
+
+# Update user preferences
+post "/preferences" do |env|
+  user = env.session.object("current_user").as(User)
+  user.preferences["theme"] = env.params.body["theme"].as(String)
+  
+  # Save updated user back to session
+  env.session.object("current_user", user)
+  "Preferences updated!"
+end
+```
+
+### Complex Example: Shopping Cart with Items
+
+```crystal
+class CartItem
+  include JSON::Serializable
+  include Kemal::Session::StorableObject
+
+  property id : String
+  property name : String
+  property price : Float64
+  property quantity : Int32
+
+  def initialize(@id : String, @name : String, @price : Float64, @quantity : Int32 = 1)
+  end
+
+  def total
+    price * quantity
+  end
+end
+
+class ShoppingCart
+  include JSON::Serializable
+  include Kemal::Session::StorableObject
+
+  property items : Array(CartItem)
+
+  def initialize
+    @items = [] of CartItem
+  end
+
+  def add_item(item : CartItem)
+    existing = items.find { |i| i.id == item.id }
+    if existing
+      existing.quantity += item.quantity
+    else
+      items << item
+    end
+  end
+
+  def total
+    items.sum(&.total)
+  end
+
+  def item_count
+    items.sum(&.quantity)
+  end
+end
+
+# Usage in routes
+post "/cart/add" do |env|
+  cart = env.session.object?("cart").try(&.as(ShoppingCart)) || ShoppingCart.new
+  
+  item = CartItem.new(
+    id: env.params.body["id"].as(String),
+    name: env.params.body["name"].as(String),
+    price: env.params.body["price"].to_f
+  )
+  
+  cart.add_item(item)
+  env.session.object("cart", cart)
+  
+  "Added to cart! Total: $#{cart.total} (#{cart.item_count} items)"
+end
+```
+
+## ⚙️ Configuration
+
+Customize session behavior to fit your application's needs:
+
+### Quick Configuration
+
 ```crystal
 Kemal::Session.config do |config|
-  config.cookie_name = "session_id"
-  config.secret = "some_secret"
-  config.gc_interval = 2.minutes # 2 minutes
+  config.cookie_name = "my_app_session"     # Custom cookie name
+  config.secret = "your-super-secret-key"   # 🔑 Always set this in production!
+  config.timeout = 2.hours                  # Session expires after 2 hours
+  config.gc_interval = 5.minutes            # Clean expired sessions every 5 minutes
+  config.secure = true                      # Only send over HTTPS
+  config.domain = "example.com"             # Scope to specific domain
 end
 ```
-or
+
+### One-line Configuration
+
 ```crystal
 Kemal::Session.config.cookie_name = "session_id"
-Kemal::Session.config.secret = "some_secret"
-Kemal::Session.config.gc_interval = 2.minutes # 2 minutes
+Kemal::Session.config.secret = "my-secret-key"
+Kemal::Session.config.timeout = 30.minutes
 ```
 
-| Option  | explanation | default |
-|---|---|---|
-| timeout | How long is the session valid after last user interaction?  | ```Time::Span.new(1, 0, 0)``` (1 hour)  |
-| cookie_name | Name of the cookie that holds the session_id on the client | ```"kemal_sessid"``` |
-| engine | How are the sessions saved on the server? (see section below) | ```Kemal::Session::MemoryEngine.new``` |
-| gc_interval | In which interval should the garbage collector find and delete expired sessions from the server?  | ```Time::Span.new(0, 4, 0)``` (4 minutes)  |
-| secret | Used to sign the session ids before theyre saved in the cookie. *Strongly* encouraged to [create your own secret](#creating-a-new-secret) | ```""``` |
-| secure | The cookie used for session management should only be transmitted over encrypted connections. | ```false``` |
-| domain | Domain to use to scope cookie | ```nil``` |
-| path   | Scope cookie to a particular path | ```"/"``` |
+### 📋 Configuration Options
 
-#### Setting the Engine
-The standard engine is the MemoryEngine
+| Option | Description | Default | Example |
+|--------|-------------|---------|---------|
+| `timeout` | Session expires after this time since last activity | `1.hour` | `2.hours`, `30.minutes` |
+| `cookie_name` | Name of the session cookie | `"kemal_sessid"` | `"my_app_session"` |
+| `engine` | Storage backend for sessions | `MemoryEngine` | `FileEngine`, `RedisEngine` |
+| `gc_interval` | How often to clean expired sessions | `4.minutes` | `10.minutes`, `1.hour` |
+| `secret` | Secret key for signing session cookies | `""` ⚠️ | Generated secure string |
+| `secure` | Send cookie only over HTTPS | `false` | `true` for production |
+| `domain` | Scope cookie to specific domain | `nil` | `"example.com"` |
+| `path` | Scope cookie to specific path | `"/"` | `"/app"` |
+| `samesite` | SameSite cookie policy | `nil` | `HTTP::Cookie::SameSite::Strict` |
 
-The engine you use has a huge impact on performance and can enable you to share sessions between different servers, make them available to any other application or whatever you can imagine. So the choice of engine is very important.
+### 🔐 Security Best Practices
 
-```crystal
-Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => "/var/foobar/sessions/"})
-```
-You can also write your own engine if you like. Take a look at the [wiki page](https://github.com/kemalcr/kemal-session/wiki/Creating-your-session-engine). If you think it might also be helpful for others just let me know about it and I will include it in a list of known engines or something.
-
-#### Creating a new `secret`
+#### 1. Generate a Secure Secret
 
 ```bash
+# Generate a random secret key
 crystal eval 'require "random/secure"; puts Random::Secure.hex(64)'
 ```
 
-Once this has been generated, it's very important that you keep this in a safe
-place. Environment variables tend to be a good place for that. If the
-`secret` is lost all of the sessions will get reset.
-
-### Logout and managing sessions
-If you want to log a user out, simply call `destroy` on the session object:
 ```crystal
-get "/logout" do |env|
-  env.session.destroy
-  "You have been logged out."
-end
+# Use environment variables in production
+Kemal::Session.config.secret = ENV["SESSION_SECRET"]? || "fallback-for-development"
 ```
-It is also possible to manage other users' sessions if you want to build an administrator's interface, for example:
-- `Kemal::Session.get(session_id)` returns the session object identified by the given id
-- `Kemal::Session.each { |session| … }` executes the given block on every session
-- `Kemal::Session.all` returns an array containing all sessions
-- `Kemal::Session.destroy(session_id)` destroys the session identified by the given id (logs the user out)
-- `Kemal::Session.destroy_all` destroys all sessions (logs everyone out including you)
 
-**You should be very careful with those, though.** These functions enable you to access and modify all information that is stored in all sessions, also in those that do not belong to the current user. So take extra care of security when using them.
-Additionally, depending on the engine used and on how many active sessions there are, `Kemal::Session.all` and `Kemal::Session.each` might be memory intensive as they have to load all the sessions into memory at once, in the worst case. It is best to check/ask how your engine handles that when in doubt.
-
-## Securing the cookies
-
-You can use the `samesite` parameter like the following
+#### 2. Production Security Settings
 
 ```crystal
 Kemal::Session.config do |config|
-  config.samesite = HTTP::Cookie::SameSite::Strict
+  config.secret = ENV["SESSION_SECRET"]                    # From environment
+  config.secure = true                                     # HTTPS only
+  config.samesite = HTTP::Cookie::SameSite::Strict         # CSRF protection
+  config.domain = "yourdomain.com"                         # Scope to your domain
+  config.timeout = 1.hour                                  # Reasonable timeout
 end
 ```
 
-## Compatible Engines
-- [kemal-session-redis](https://github.com/neovintage/kemal-session-redis): Redis based session storage engine.
-- [kemal-session-mysql](https://github.com/crisward/kemal-session-mysql): Mysql based session storage engine.
-- [kemal-session-postgres](https://github.com/mang/kemal-session-postgres): PostgreSQL based session storage engine.
-- [kemal-session-rethinkdb](https://github.com/kingsleyh/kemal-session-rethinkdb) RethinkDB based session storage engine.
+#### 3. Cookie Security
 
-### Thanks
+```crystal
+Kemal::Session.config do |config|
+  config.samesite = HTTP::Cookie::SameSite::Strict   # Prevents CSRF attacks
+  config.secure = true                               # HTTPS only
+  config.domain = "example.com"                      # Limit to your domain
+end
+```
 
-Special thanks to [Thyra](https://github.com/Thyra) for initial efforts.
+## 🗄️ Storage Engines
+
+Choose the right storage engine for your application's needs:
+
+### Memory Engine (Default)
+Perfect for development and single-server applications:
+
+```crystal
+# Already the default, but you can configure it explicitly
+Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
+```
+
+**Pros**: Fast, no setup required  
+**Cons**: Sessions lost on server restart, not suitable for multiple servers
+
+### File Engine
+Store sessions on disk for persistence across restarts:
+
+```crystal
+Kemal::Session.config.engine = Kemal::Session::FileEngine.new({
+  :sessions_dir => "/var/lib/my_app/sessions/"
+})
+```
+
+**Pros**: Persists across restarts, simple setup  
+**Cons**: File I/O overhead, not suitable for multiple servers
+
+### Production-Ready Engines
+
+For production applications, consider these external engines:
+
+| Engine | Use Case | Setup |
+|--------|----------|-------|
+| **[Redis](https://github.com/neovintage/kemal-session-redis)** | High performance, multiple servers | `shard.yml: kemal-session-redis` |
+| **[PostgreSQL](https://github.com/mang/kemal-session-postgres)** | Existing PostgreSQL infrastructure | `shard.yml: kemal-session-postgres` |
+| **[MySQL](https://github.com/crisward/kemal-session-mysql)** | Existing MySQL infrastructure | `shard.yml: kemal-session-mysql` |
+| **[RethinkDB](https://github.com/kingsleyh/kemal-session-rethinkdb)** | Real-time applications | `shard.yml: kemal-session-rethinkdb` |
+
+### Redis Engine Example
+
+```yaml
+# shard.yml
+dependencies:
+  kemal-session:
+    github: kemalcr/kemal-session
+  kemal-session-redis:
+    github: neovintage/kemal-session-redis
+```
+
+```crystal
+require "kemal"
+require "kemal-session"
+require "kemal-session-redis"
+
+Kemal::Session.config.engine = Kemal::Session::RedisEngine.new(
+  host: "localhost",
+  port: 6379,
+  password: ENV["REDIS_PASSWORD"]?,
+  database: 0
+)
+```
+
+### Custom Engine
+
+Create your own storage engine by implementing the required interface. Check the [wiki](https://github.com/kemalcr/kemal-session/wiki/Creating-your-session-engine) for detailed instructions.
+
+## 🚪 Session Management
+
+### 🚪 User Logout
+
+```crystal
+get "/logout" do |env|
+  env.session.destroy
+  redirect "/login"
+end
+```
+
+### 👨‍💼 Administrative Session Management
+
+For building admin interfaces, you can manage other users' sessions:
+
+```crystal
+# Get specific session by ID
+admin_session = Kemal::Session.get("session_id_here")
+
+# Iterate through all active sessions
+Kemal::Session.each do |session|
+  puts "Session: #{session.id}, Last Activity: #{session.last_access_time}"
+end
+
+# Get all sessions as an array
+all_sessions = Kemal::Session.all
+puts "Total active sessions: #{all_sessions.size}"
+
+# Force logout a specific user
+Kemal::Session.destroy("problematic_session_id")
+
+# Emergency: Log out all users
+Kemal::Session.destroy_all
+```
+
+⚠️ **Security Warning**: Administrative session functions access ALL user sessions. Use with extreme caution and proper authorization checks:
+
+```crystal
+get "/admin/sessions" do |env|
+  # Always verify admin permissions first!
+  admin_user = env.session.object?("current_user").try(&.as(User))
+  halt env, status_code: 403, response: "Forbidden" unless admin_user.try(&.admin?)
+  
+  sessions = Kemal::Session.all
+  # ... render admin interface
+end
+```
+
+### 🗑️ Memory Considerations
+
+- `Kemal::Session.all` and `Kemal::Session.each` load all sessions into memory
+- For high-traffic applications, consider pagination or streaming approaches
+- The memory impact depends on your storage engine implementation
+
+## 🏆 Production Examples
+
+### Complete Authentication System
+
+```crystal
+require "kemal"
+require "kemal-session"
+
+# Configure session for production
+Kemal::Session.config do |config|
+  config.secret = ENV["SESSION_SECRET"]
+  config.secure = true if ENV["KEMAL_ENV"]? == "production"
+  config.timeout = 2.hours
+  config.samesite = HTTP::Cookie::SameSite::Strict
+end
+
+# Add CSRF protection
+add_handler Kemal::Session::CSRF.new
+
+# User model
+class User
+  include JSON::Serializable
+  include Kemal::Session::StorableObject
+
+  property id : Int32
+  property username : String
+  property email : String
+  property admin : Bool
+
+  def initialize(@id : Int32, @username : String, @email : String, @admin : Bool = false)
+  end
+end
+
+# Login route
+post "/login" do |env|
+  username = env.params.body["username"].as(String)
+  password = env.params.body["password"].as(String)
+  
+  # Authenticate user (implement your logic)
+  if user = authenticate_user(username, password)
+    env.session.object("current_user", user)
+    env.session.string("login_time", Time.utc.to_s)
+    redirect "/dashboard"
+  else
+    env.session.string("error", "Invalid credentials")
+    redirect "/login"
+  end
+end
+
+# Protected route
+get "/dashboard" do |env|
+  user = env.session.object?("current_user").try(&.as(User))
+  halt env, status_code: 401, response: "Please log in" unless user
+  
+  "Welcome #{user.username}! You logged in at #{env.session.string?("login_time")}"
+end
+
+# Admin-only route
+get "/admin" do |env|
+  user = env.session.object?("current_user").try(&.as(User))
+  halt env, status_code: 401, response: "Please log in" unless user
+  halt env, status_code: 403, response: "Admin required" unless user.admin
+  
+  "Admin panel - manage users here"
+end
+
+Kemal.run
+```
+
+### API with Session-based Auth
+
+```crystal
+# API endpoints with session authentication
+get "/api/profile" do |env|
+  env.response.content_type = "application/json"
+  
+  user = env.session.object?("current_user").try(&.as(User))
+  if user
+    user.to_json
+  else
+    env.response.status_code = 401
+    {"error" => "Authentication required"}.to_json
+  end
+end
+```
+
+## 📚 Helpful Resources
+
+- 📖 [Crystal Language Documentation](https://crystal-lang.org/docs/)
+- 🌐 [Kemal Framework](https://kemalcr.com/)
+- 🔧 [Creating Custom Engines](https://github.com/kemalcr/kemal-session/wiki/Creating-your-session-engine)
+- 💡 [Crystal Security Best Practices](https://crystal-lang.org/reference/guides/security.html)
+
+## 🤝 Contributing
+
+We love contributions! Here's how you can help:
+
+1. 🍴 Fork the repository
+2. 🌟 Create a feature branch (`git checkout -b my-new-feature`)
+3. ✍️ Make your changes and add tests
+4. ✅ Ensure all tests pass (`crystal spec`)
+5. 📝 Commit your changes (`git commit -am 'Add some feature'`)
+6. 🚀 Push to the branch (`git push origin my-new-feature`)
+7. 🎯 Create a Pull Request
+
+## 🙏 Acknowledgments
+
+Special thanks to:
+- [Thyra](https://github.com/Thyra) for the initial implementation
+- The Crystal and Kemal communities for their support
+
 

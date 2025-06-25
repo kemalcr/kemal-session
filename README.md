@@ -36,6 +36,66 @@ end
 Kemal.run
 ```
 
+### CSRF Protection
+
+`kemal-session` provides built-in CSRF (Cross-Site Request Forgery) protection middleware.
+
+#### Basic Usage
+
+Add the CSRF handler to your Kemal app:
+
+```crystal
+add_handler Kemal::Session::CSRF.new
+```
+
+To include the CSRF token in your HTML forms (e.g., in `.ecr` templates):
+
+```html
+<input type="hidden" name="authenticity_token" value="<%= env.session.string("csrf") %>">
+```
+
+#### Customizing CSRF Behavior
+
+You can customize the CSRF middleware by passing options:
+
+```crystal
+add_handler Kemal::Session::CSRF.new(
+  header: "X_CSRF_TOKEN",                   # Custom header name for token
+  allowed_methods: ["GET", "HEAD"],         # HTTP methods that skip CSRF check
+  allowed_routes: ["/api/health"],          # Routes that skip CSRF check
+  parameter_name: "_csrf",                  # Form field name for token
+  error: "CSRF Error",                      # Error message or handler
+  http_only: false,                         # Set CSRF cookie as HttpOnly
+  samesite: nil                             # SameSite policy for CSRF cookie
+)
+```
+
+#### Custom Error Handling
+
+You can provide a custom error handler as a proc:
+
+```crystal
+add_handler Kemal::Session::CSRF.new(
+  error: -> csrf_error_handler(HTTP::Server::Context)
+)
+
+def csrf_error_handler(env)
+  if env.request.headers["Content-Type"]? == "application/json"
+    {"error" => "CSRF error"}.to_json
+  else
+    "<html><body><h1>CSRF token missing or invalid</h1></body></html>"
+  end
+end
+```
+
+#### Notes
+
+- The CSRF token is stored in the session and must be included in all non-safe HTTP requests (e.g., POST, PUT, DELETE).
+- You can adjust which HTTP methods and routes are exempt from CSRF checks using `allowed_methods` and `allowed_routes`.
+- For APIs, you may prefer to send the token in a custom header.
+
+For more details, see the [Kemal::Session::CSRF documentation](https://github.com/kemalcr/kemal-session).
+
 ### Available Types
 
 The session can save many different types but the method names differ from the type.

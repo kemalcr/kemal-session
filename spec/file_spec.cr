@@ -35,7 +35,7 @@ def should_be_empty_file_session(session_id)
 end
 
 describe "Session::FileEngine" do
-  before_all do
+  before_each do
     Kemal::Session.config.secret = "super-awesome-secret"
     Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => SESSION_DIR})
   end
@@ -58,14 +58,16 @@ describe "Session::FileEngine" do
 
   describe ".int" do
     it "can save a value" do
-      session = Kemal::Session.new(create_context(SESSION_ID))
+      file_session_id = Random::Secure.hex
+      session = Kemal::Session.new(create_context(file_session_id))
       session.int("bar", 12)
-      get_file_session_contents(SESSION_ID).should \
+      get_file_session_contents(file_session_id).should \
         eq("{\"ints\":{\"bar\":12},\"bigints\":{},\"strings\":{},\"floats\":{},\"bools\":{},\"objects\":{}}")
     end
 
     it "can retrieve a saved value" do
-      session = Kemal::Session.new(create_context(SESSION_ID))
+      file_session_id = Random::Secure.hex
+      session = Kemal::Session.new(create_context(file_session_id))
       session.int("bar", 12)
       session.int("bar").should eq 12
     end

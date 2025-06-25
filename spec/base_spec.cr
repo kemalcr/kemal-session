@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 describe "Session" do
-  before_all do
+  before_each do
     Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
     Kemal::Session.config.secret = "kemal_rocks"
   end

@@ -37,6 +37,9 @@ shards install
 require "kemal"
 require "kemal-session"
 
+# Session Configuration
+Kemal::Session.config.secret = "my-secret-key"
+
 # Store data in session
 get "/login" do |env|
   env.session.string("username", "alice")
@@ -69,6 +72,9 @@ Kemal.run
 ```crystal
 require "kemal"
 require "kemal-session"
+
+# Session Configuration
+Kemal::Session.config.secret = "my-secret-key"
 
 # Add item to cart
 post "/cart/add" do |env|
@@ -105,6 +111,9 @@ Protect your application from Cross-Site Request Forgery attacks with built-in C
 ```crystal
 require "kemal"
 require "kemal-session"
+
+# Session Configuration
+Kemal::Session.config.secret = "my-secret-key"
 
 # Add CSRF protection
 add_handler Kemal::Session::CSRF.new
@@ -235,6 +244,9 @@ end
 ```crystal
 require "kemal"
 require "kemal-session"
+
+# Session Configuration
+Kemal::Session.config.secret = "my-secret-key"
 
 # Store user in session
 post "/login" do |env|

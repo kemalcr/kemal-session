@@ -1,3 +1,7 @@
+# 1.2.0 (25-06-2025)
+
+- Built-in CSRF support :tada:
+
 # 1.1.0 (25-06-2025)
 
 - Crystal 1.16.3 support :tada:

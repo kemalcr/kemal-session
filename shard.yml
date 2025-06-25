@@ -9,3 +9,4 @@ crystal: ">= 1.0.0"
 development_dependencies:
   kemal:
     github: kemalcr/kemal
+    version: "~> 1.7.0"

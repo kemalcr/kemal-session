@@ -1,6 +1,11 @@
 require "./spec_helper"
 
 describe "CSRF" do
+  before_each do
+    Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
+    Kemal::Session.config.secret = "kemal_rocks"
+  end
+
   it "sends GETs to next handler" do
     handler = Kemal::Session::CSRF.new
     request = HTTP::Request.new("GET", "/")

@@ -288,15 +288,15 @@ describe "Session" do
   end
 
   describe "signed cookies" do
-    signed_session = "#{SESSION_ID}--#{Kemal::Session.sign_value(SESSION_ID)}"
-
     it "should use the same session_id" do
+      signed_session = "#{SESSION_ID}--#{Kemal::Session.sign_value(SESSION_ID)}"
       context = create_context(SESSION_ID)
       session = Kemal::Session.new(context)
       context.response.cookies[Kemal::Session.config.cookie_name].value.should eq(signed_session)
     end
 
     it "should return a new session if signed token has been tampered" do
+      signed_session = "#{SESSION_ID}--#{Kemal::Session.sign_value(SESSION_ID)}"
       tampered_session = "123" + signed_session[3..-1]
       context = create_context(tampered_session)
       session = Kemal::Session.new(context)

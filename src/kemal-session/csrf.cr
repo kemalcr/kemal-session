@@ -16,6 +16,7 @@ module Kemal
         @allowed_routes = [] of String,
         @http_only : Bool = false,
         @samesite : HTTP::Cookie::SameSite? = nil,
+	@per_session : Bool = false,
       )
         setup
       end
@@ -54,7 +55,7 @@ module Kemal
                     end
         current_token = context.session.string("csrf")
         if current_token == submitted
-          context.session.string("csrf", Random::Secure.hex(16))
+          context.session.string("csrf", Random::Secure.hex(16)) unless @per_session
 
           return call_next(context)
         else

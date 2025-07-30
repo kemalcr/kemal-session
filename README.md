@@ -451,12 +451,12 @@ Kemal::Session.config.engine = Kemal::Session::FileEngine.new({
 
 For production applications, consider these external engines:
 
-| Engine | Use Case | Setup |
+| Engine | Use Case | shard.yml |
 |--------|----------|-------|
-| **[Redis](https://github.com/neovintage/kemal-session-redis)** | High performance, multiple servers | `shard.yml: kemal-session-redis` |
-| **[PostgreSQL](https://github.com/mang/kemal-session-postgres)** | Existing PostgreSQL infrastructure | `shard.yml: kemal-session-postgres` |
-| **[MySQL](https://github.com/crisward/kemal-session-mysql)** | Existing MySQL infrastructure | `shard.yml: kemal-session-mysql` |
-| **[RethinkDB](https://github.com/kingsleyh/kemal-session-rethinkdb)** | Real-time applications | `shard.yml: kemal-session-rethinkdb` |
+| **[Redis](https://github.com/neovintage/kemal-session-redis)** | High performance, multiple servers | `neovintage/kemal-session-redis` |
+| **[PostgreSQL](https://github.com/mang/kemal-session-postgres)** | Existing PostgreSQL infrastructure | `mang/kemal-session-postgres` |
+| **[MySQL](https://github.com/crisward/kemal-session-mysql)** | Existing MySQL infrastructure | `crisward/kemal-session-mysql` |
+| **[RethinkDB](https://github.com/kingsleyh/kemal-session-rethinkdb)** | Real-time applications | `kingsleyh/kemal-session-rethinkdb` |
 
 ### Redis Engine Example
 

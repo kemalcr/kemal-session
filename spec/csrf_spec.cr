@@ -112,6 +112,22 @@ describe "CSRF" do
     client_response.status_code.should eq 403
     client_response.body.should eq "Error from handler"
   end
+
+  it "does not change the token when per_session is set" do
+    handler = Kemal::Session::CSRF.new(per_session: true)
+    request = HTTP::Request.new("POST", "/first",
+      body: "foo=bar",
+      headers: HTTP::Headers{"Content-Type" => "application/x-www-form-urlencoded"})
+    io, context = process_request(handler, request)
+    first_response = HTTP::Client::Response.from_io(io, decompress: false)
+    first_token = context.session.string("csrf")
+    request = HTTP::Request.new("POST", "/second",
+      body: "authenticity_token=#{first_token}",
+      headers: HTTP::Headers{"Content-Type" => "application/x-www-form-urlencoded",
+                             "Cookie"       => first_response.headers["Set-Cookie"]})
+    io, context = process_request(handler, request)
+    context.session.string("csrf").should eq first_token
+  end
 end
 
 def create_request_and_return_io(handler, request)

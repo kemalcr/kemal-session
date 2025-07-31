@@ -641,9 +641,10 @@ We love contributions! Here's how you can help:
 2. 🌟 Create a feature branch (`git checkout -b my-new-feature`)
 3. ✍️ Make your changes and add tests
 4. ✅ Ensure all tests pass (`crystal spec`)
-5. 📝 Commit your changes (`git commit -am 'Add some feature'`)
-6. 🚀 Push to the branch (`git push origin my-new-feature`)
-7. 🎯 Create a Pull Request
+5. ✅ Ensure consistent code formatting (`crystal tool format`)
+6. 📝 Commit your changes (`git commit -am 'Add some feature'`)
+7. 🚀 Push to the branch (`git push origin my-new-feature`)
+8. 🎯 Create a Pull Request
 
 ## 🙏 Acknowledgments
 

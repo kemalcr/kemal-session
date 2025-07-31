@@ -16,7 +16,7 @@ module Kemal
         @allowed_routes = [] of String,
         @http_only : Bool = false,
         @samesite : HTTP::Cookie::SameSite? = nil,
-	@per_session : Bool = false,
+        @per_session : Bool = false,
       )
         setup
       end

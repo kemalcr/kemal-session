@@ -151,9 +151,14 @@ add_handler Kemal::Session::CSRF.new(
   per_session: false                           # see below
 )
 ```
-If `per_session` is `false` (the default), the token is valid for one use; 
-if `per_session` is `true` the token does not change during a session's lifetime.
-This is useful for partial page updates with AJAX-based approaches like HTMX.
+#### CSRF Token per request or per session?
+If `per_session` is `false` (the default), the token changes after one single submission; this is
+ideal for "classic" web pages that are fully loaded for each request.
+
+If `per_session` is `true` the token is not automatically updated during a session's lifetime;
+manual changes via `env.session.string("csrf","new_token")` are still possible.
+This is useful for partial page updates with AJAX-based approaches like [HTMX](https://htmx.org),
+as you can change the CSRF token with each full page load while keeping it the same for partial operations.
 
 ### CSRF for API Endpoints
 

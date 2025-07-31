@@ -143,13 +143,17 @@ Kemal.run
 ```crystal
 # Customize CSRF behavior
 add_handler Kemal::Session::CSRF.new(
-  header: "X-CSRF-TOKEN",                    # Custom header for AJAX requests
+  header: "X-CSRF-TOKEN",                      # Custom header for AJAX requests
   allowed_methods: ["GET", "HEAD", "OPTIONS"], # Methods that skip CSRF check
-  allowed_routes: ["/api/public"],           # Public routes that skip CSRF
-  parameter_name: "_token",                  # Custom form field name
-  error: "Invalid or missing CSRF token"     # Custom error message
+  allowed_routes: ["/api/public"],             # Public routes that skip CSRF
+  parameter_name: "_token",                    # Custom form field name
+  error: "Invalid or missing CSRF token",      # Custom error message
+  per_session: false                           # see below
 )
 ```
+If `per_session` is `false` (the default), the token is valid for one use; 
+if `per_session` is `true` the token does not change during a session's lifetime.
+This is useful for partial page updates with AJAX-based approaches like HTMX.
 
 ### CSRF for API Endpoints
 

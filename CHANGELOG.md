@@ -1,3 +1,7 @@
+# 1.3.0 (03-08-2025)
+
+- Add option for per-session CSRF token [#105](https://github.com/kemalcr/kemal-session/pull/105). Thanks @swsch :pray:
+
 # 1.2.0 (25-06-2025)
 
 - Built-in CSRF support :tada:

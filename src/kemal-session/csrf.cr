@@ -13,16 +13,16 @@ module Kemal
         @allowed_methods = %w(GET HEAD OPTIONS TRACE),
         @parameter_name = "authenticity_token",
         @error : String | (HTTP::Server::Context -> String) = "Forbidden (CSRF)",
-        @allowed_routes = [] of String,
+        allowed_routes : Array(String)? = nil,
         @http_only : Bool = false,
         @samesite : HTTP::Cookie::SameSite? = nil,
         @per_session : Bool = false,
       )
-        setup
+        setup(allowed_routes) if allowed_routes
       end
 
-      def setup
-        @allowed_routes.each do |path|
+      private def setup(allowed_routes : Array(String))
+        allowed_routes.each do |path|
           class_name = {{@type.name}}
           %w(GET HEAD OPTIONS TRACE PUT POST).each do |method|
             @@exclude_routes_tree.add "#{class_name}/#{method}#{path}", "/#{method}#{path}"

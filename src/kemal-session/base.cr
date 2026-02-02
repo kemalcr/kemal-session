@@ -24,7 +24,8 @@ module Kemal
 
       if id.nil? || !valid
         id = Random::Secure.hex
-        Kemal::Session.config.engine.create_session(id)
+        # Session will be created lazily when data is written
+        # This prevents empty sessions from being stored (e.g., from bots/crawlers)
       end
 
       ctx.response.cookies << Session.create_cookie(id)
@@ -52,7 +53,7 @@ module Kemal
       destroy
       if context = @context
         @id = Random::Secure.hex
-        Kemal::Session.config.engine.create_session(@id)
+        # Session will be created lazily when data is written
         context.response.cookies << self.class.create_cookie(@id)
       end
     end

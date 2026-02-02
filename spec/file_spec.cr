@@ -251,6 +251,7 @@ describe "Session::FileEngine" do
   describe ".destroy" do
     it "should remove session from filesystem" do
       session = Kemal::Session.new(create_context(SESSION_ID))
+      session.int("test", 1) # Write data so session is persisted
       File.file?(SESSION_DIR + SESSION_ID + ".json").should be_true
       session.destroy
       File.file?(SESSION_DIR + SESSION_ID + ".json").should be_false
@@ -260,6 +261,7 @@ describe "Session::FileEngine" do
   describe "#destroy" do
     it "should remove session from filesystem" do
       session = Kemal::Session.new(create_context(SESSION_ID))
+      session.int("test", 1) # Write data so session is persisted
       File.file?(SESSION_DIR + SESSION_ID + ".json").should be_true
       Kemal::Session.destroy(SESSION_ID)
       File.file?(SESSION_DIR + SESSION_ID + ".json").should be_false
@@ -272,7 +274,10 @@ describe "Session::FileEngine" do
 
   describe "#run_gc" do
     it "should remove all sessions that are older than gc config" do
-      2.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      2.times do
+        session = Kemal::Session.new(create_context(Random::Secure.hex))
+        session.int("test", 1) # Write data so session is persisted
+      end
       Kemal::Session.all.size.should eq(2)
 
       # should remove nothing, as the gc > now
@@ -288,7 +293,10 @@ describe "Session::FileEngine" do
 
   describe "#destroy_all" do
     it "should remove all sessions in filesystem" do
-      5.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      5.times do
+        session = Kemal::Session.new(create_context(Random::Secure.hex))
+        session.int("test", 1) # Write data so session is persisted
+      end
       Kemal::Session.all.size.should eq(5)
 
       Kemal::Session.destroy_all
@@ -346,7 +354,10 @@ describe "Session::FileEngine" do
     end
 
     it "should return an array of Sessions" do
-      3.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      3.times do
+        session = Kemal::Session.new(create_context(Random::Secure.hex))
+        session.int("test", 1) # Write data so session is persisted
+      end
       arr = Kemal::Session.all
       arr.is_a?(Array).should be_true
       arr.size.should eq(3)
@@ -355,7 +366,10 @@ describe "Session::FileEngine" do
 
   describe "#each" do
     it "should iterate over all sessions" do
-      5.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      5.times do
+        session = Kemal::Session.new(create_context(Random::Secure.hex))
+        session.int("test", 1) # Write data so session is persisted
+      end
       count = 0
       Kemal::Session.each do |session|
         count = count + 1

@@ -1,3 +1,8 @@
+# 1.4.0 (03-02-2025)
+
+- Prevent empty sessions from being stored (lazy session creation) [#113](https://github.com/kemalcr/kemal-session/pull/113) Thanks @sdogruyol :pray:
+- Add flash functionality [#112](https://github.com/kemalcr/kemal-session/pull/112). Thanks @sdogruyol :pray:
+
 # 1.3.0 (03-08-2025)
 
 - Add option for per-session CSRF token [#105](https://github.com/kemalcr/kemal-session/pull/105). Thanks @swsch :pray:

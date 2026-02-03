@@ -175,6 +175,68 @@ csrf_handler = Kemal::Session::CSRF.new(
 add_handler csrf_handler
 ```
 
+## 💬 Flash Messages
+
+Flash messages are one-time messages that persist across a single redirect—ideal for success notices, errors, or warnings after form submissions.
+
+- **Set** a flash message in one request (e.g. after an action).
+- **Read** it in the next request (e.g. the redirected page); the value is then removed automatically.
+
+### Basic Usage
+
+```crystal
+require "kemal"
+require "kemal-session"
+
+Kemal::Session.config.secret = "my-secret-key"
+
+# Set a flash message (e.g. after login or form submit)
+post "/login" do |env|
+  # ... authenticate user ...
+  env.flash["notice"] = "Welcome back!"
+  env.redirect "/dashboard"
+end
+
+# Read the flash in the next request (e.g. layout or target page)
+get "/dashboard" do |env|
+  notice = env.flash["notice"]?   # returns value and clears it
+  error  = env.flash["error"]?    # optional: nil if key missing
+  
+  message = notice ? "<p class=\"notice\">#{notice}</p>" : ""
+  message += error ? "<p class=\"error\">#{error}</p>" : ""
+  "Dashboard\n#{message}"
+end
+```
+
+### API
+
+| Operation | Method | Behavior |
+|-----------|--------|----------|
+| Set | `env.flash["key"] = "value"` | Stores the message for the next request |
+| Read (optional) | `env.flash["key"]?` | Returns the value and removes it; returns `nil` if key is missing |
+| Read (required) | `env.flash["key"]` | Returns the value and removes it; raises `KeyError` if key is missing |
+
+Use `env.flash["key"]?` when the key might not be set (e.g. optional notices). Use `env.flash["key"]` when you expect the key to exist; it will raise if the message was already consumed or never set.
+
+### Example: Form with Success/Error
+
+```crystal
+post "/contact" do |env|
+  if send_email(env.params.body)
+    env.flash["notice"] = "Message sent successfully."
+  else
+    env.flash["error"] = "Failed to send message."
+  end
+  env.redirect "/contact"
+end
+
+get "/contact" do |env|
+  notice = env.flash["notice"]?
+  error  = env.flash["error"]?
+  # Render form and show notice/error above it
+end
+```
+
 ## 📊 Supported Data Types
 
 Kemal Session supports all common Crystal types with intuitive method names:

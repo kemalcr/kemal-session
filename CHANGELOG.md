@@ -1,4 +1,4 @@
-# 1.4.0 (03-02-2025)
+# 1.4.0 (03-02-2026)
 
 - Prevent empty sessions from being stored (lazy session creation) [#113](https://github.com/kemalcr/kemal-session/pull/113) Thanks @sdogruyol :pray:
 - Add flash functionality [#112](https://github.com/kemalcr/kemal-session/pull/112). Thanks @sdogruyol :pray:

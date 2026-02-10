@@ -31,7 +31,7 @@ shards install
 
 ## 🚀 Quick Start
 
-### 1. Basic Session Usage
+### 1. Basic Session Usage (User Login / Logout)
 
 ```crystal
 require "kemal"
@@ -40,28 +40,32 @@ require "kemal-session"
 # Session Configuration
 Kemal::Session.config.secret = "my-secret-key"
 
-# Store data in session
-get "/login" do |env|
-  env.session.string("username", "alice")
-  env.session.int("user_id", 123)
-  "Welcome! You're now logged in."
+# User login (create session)
+post "/login" do |env|
+  username = env.params.body["username"]?.to_s
+
+  # In a real app you would authenticate here
+  env.session.string("username", username)
+  env.session.bool("logged_in", true)
+
+  "Welcome #{username}, you're now logged in."
 end
 
-# Retrieve data from session
+# Protected route using session
 get "/profile" do |env|
+  unless env.session.bool?("logged_in")
+    env.response.status_code = 401
+    next "Please log in first"
+  end
+
   username = env.session.string("username")
-  user_id = env.session.int("user_id")
-  
-  "Hello #{username}! Your ID is #{user_id}"
+  "Hello #{username}!"
 end
 
-# Optional values (returns nil if not found)
-get "/dashboard" do |env|
-  last_visit = env.session.string?("last_visit")
-  message = last_visit ? "Welcome back! Last visit: #{last_visit}" : "First time here!"
-  
-  env.session.string("last_visit", Time.utc.to_s)
-  message
+# User logout (destroy session)
+post "/logout" do |env|
+  env.session.destroy
+  "You have been logged out."
 end
 
 Kemal.run

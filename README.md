@@ -528,7 +528,7 @@ For production applications, consider these external engines:
 
 | Engine | Use Case | shard.yml |
 |--------|----------|-------|
-| **[Redis](https://github.com/neovintage/kemal-session-redis)** | High performance, multiple servers | `neovintage/kemal-session-redis` |
+| **[Redis](https://github.com/crystal-garage/kemal-session-redis-engine)** | High performance, multiple servers | `crystal-garage/kemal-session-redis-engine` |
 | **[PostgreSQL](https://github.com/mang/kemal-session-postgres)** | Existing PostgreSQL infrastructure | `mang/kemal-session-postgres` |
 | **[MySQL](https://github.com/crisward/kemal-session-mysql)** | Existing MySQL infrastructure | `crisward/kemal-session-mysql` |
 | **[RethinkDB](https://github.com/kingsleyh/kemal-session-rethinkdb)** | Real-time applications | `kingsleyh/kemal-session-rethinkdb` |
@@ -540,21 +540,34 @@ For production applications, consider these external engines:
 dependencies:
   kemal-session:
     github: kemalcr/kemal-session
-  kemal-session-redis:
-    github: neovintage/kemal-session-redis
+  kemal-session-redis-engine:
+    github: crystal-garage/kemal-session-redis-engin
 ```
 
 ```crystal
 require "kemal"
 require "kemal-session"
-require "kemal-session-redis"
+require "kemal-session-redis-engine"
 
-Kemal::Session.config.engine = Kemal::Session::RedisEngine.new(
-  host: "localhost",
-  port: 6379,
-  password: ENV["REDIS_PASSWORD"]?,
-  database: 0
-)
+Kemal::Session.config do |config|
+  config.cookie_name = "redis_test"
+  config.secret = "a_secret"
+  config.engine = Kemal::Session::RedisEngine.new(
+    "redis://localhost:6379/0?initial_pool_size=1&max_pool_size=10&checkout_timeout=10&retry_attempts=2&retry_delay=0.5&max_idle_pool_size=50",
+    key_prefix: "my_app:session:"
+  )
+  config.timeout = Time::Span.new(1, 0, 0)
+end
+
+get "/" do
+  puts "Hello World"
+end
+
+post "/sign_in" do |context|
+  context.session.int("see-it-works", 1)
+end
+
+Kemal.run
 ```
 
 ### Custom Engine

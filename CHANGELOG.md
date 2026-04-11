@@ -1,3 +1,7 @@
+# 1.5.0 (11-04-2026)
+
+- Default session cookie `SameSite` to `Lax` (previously unset). Improves protection against cross-site cookie sending while keeping typical first-visit flows working; use `config.samesite = nil` to omit the attribute, or `HTTP::Cookie::SameSite::Strict` for a stricter policy.
+
 # 1.4.0 (03-02-2026)
 
 - Prevent empty sessions from being stored (lazy session creation) [#113](https://github.com/kemalcr/kemal-session/pull/113) Thanks @sdogruyol :pray:

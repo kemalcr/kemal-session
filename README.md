@@ -457,7 +457,7 @@ Kemal::Session.config.timeout = 30.minutes
 | `secure` | Send cookie only over HTTPS | `false` | `true` for production |
 | `domain` | Scope cookie to specific domain | `nil` | `"example.com"` |
 | `path` | Scope cookie to specific path | `"/"` | `"/app"` |
-| `samesite` | SameSite cookie policy | `nil` | `HTTP::Cookie::SameSite::Strict` |
+| `samesite` | SameSite cookie policy | `HTTP::Cookie::SameSite::Lax` | `HTTP::Cookie::SameSite::Strict` |
 
 ### 🔐 Security Best Practices
 

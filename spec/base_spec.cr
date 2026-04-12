@@ -276,6 +276,11 @@ describe "Session" do
   end
 
   describe "cookie" do
+    it "defaults samesite to Lax for new Config" do
+      cfg = Kemal::Session::Config.new
+      cfg.samesite.should eq(HTTP::Cookie::SameSite::Lax)
+    end
+
     it "should create a cookie with the samesite set to strict" do
       Kemal::Session.config do |config|
         config.cookie_name = "woops"

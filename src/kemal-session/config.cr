@@ -27,7 +27,7 @@ module Kemal
         @secure = false
         @domain = nil
         @path = "/"
-        @samesite = nil
+        @samesite = Cookie::SameSite::Lax
       end
     end # Config
 
@@ -39,5 +39,6 @@ module Kemal
       Config::INSTANCE
     end
   end # Session
+
   include HTTP
 end

@@ -1,5 +1,5 @@
 name: kemal-session
-version: 1.4.0
+version: 1.5.0
 
 authors:
   - Serdar Dogruyol <dogruyolserdar@gmail.com>
@@ -9,4 +9,4 @@ crystal: ">= 1.0.0"
 development_dependencies:
   kemal:
     github: kemalcr/kemal
-    version: "~> 1.7.0"
+    version: "~> 1.11.0"

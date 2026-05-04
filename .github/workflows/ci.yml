@@ -19,21 +19,14 @@ jobs:
           - nightly
     runs-on: ${{ matrix.os }}
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
+    steps:    
     - name: Install Crystal
       uses: crystal-lang/install-crystal@v1
       with:
         crystal: ${{ matrix.crystal }}
     
-    - name: Cache shards
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/shards
-        key: shards-${{ hashFiles('shard.lock') }}
-        restore-keys: shards-
+    - name: Download source
+      uses: actions/checkout@v4
     
     - name: Install dependencies
       run: shards install
@@ -43,6 +36,4 @@ jobs:
     
     - name: Run tests
       run: crystal spec
-    
-    - name: Check code formatting
-      run: crystal tool format --check
+

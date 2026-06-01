@@ -60,12 +60,30 @@ module Kemal
       end
 
       def run_gc
-        before = (Time.local - Kemal::Session.config.timeout.as(Time::Span)).to_unix_ms
+        before = expiry_cutoff_ms
         @store.reject! do |id, entry|
           last_access_at = Int64.from_json(entry, root: "last_access_at")
           last_access_at < before
         end
         sleep Kemal::Session.config.gc_interval
+      end
+
+      private def reject_expired_session!(session_id : String) : Bool
+        entry = @store[session_id]?
+        return false unless entry
+
+        last_access_at = Int64.from_json(entry, root: "last_access_at")
+        if session_expired?(last_access_at)
+          destroy_session(session_id)
+          return false
+        end
+
+        true
+      end
+
+      private def active_storage_instance(session_id : String) : StorageInstance?
+        return nil unless reject_expired_session!(session_id)
+        StorageInstance.from_json(@store[session_id])
       end
 
       def all_sessions : Array(Session)
@@ -85,7 +103,7 @@ module Kemal
       end
 
       def get_session(session_id : String) : Session?
-        return nil if !@store.has_key?(session_id)
+        return nil unless reject_expired_session!(session_id)
         Session.new(session_id)
       end
 
@@ -106,35 +124,35 @@ module Kemal
       {% for name, type in vars %}
 
         def {{name.id}}(session_id : String, k : String) : {{type}}
-          storage_instance = StorageInstance.from_json(@store[session_id])
-          return storage_instance.{{name.id}}(k)
+          if storage_instance = active_storage_instance(session_id)
+            return storage_instance.{{name.id}}(k)
+          end
+          raise KeyError.new("Missing hash key: #{k.inspect}")
         end
 
         def {{name.id}}?(session_id : String, k : String) : {{type}}?
-          return nil unless @store[session_id]?
-          storage_instance = StorageInstance.from_json(@store[session_id])
-          return storage_instance.{{name.id}}?(k)
+          return nil unless storage_instance = active_storage_instance(session_id)
+          storage_instance.{{name.id}}?(k)
         end
 
         def {{name.id}}(session_id : String, k : String, v : {{type}})
-          if @store[session_id]?
-            storage_instance = StorageInstance.from_json(@store[session_id])
+          reject_expired_session!(session_id) if @store[session_id]?
+          storage_instance = if entry = @store[session_id]?
+            StorageInstance.from_json(entry)
           else
-            storage_instance = StorageInstance.new(session_id)
+            StorageInstance.new(session_id)
           end
           storage_instance.{{name.id}}(k, v)
           @store[session_id] = storage_instance.to_json
         end
 
         def {{name.id}}s(session_id : String) : Hash(String, {{type}})
-          return {} of String => {{ type }} unless @store[session_id]?
-          storage_instance = StorageInstance.from_json(@store[session_id])
-          return storage_instance.{{name.id}}s
+          return {} of String => {{ type }} unless storage_instance = active_storage_instance(session_id)
+          storage_instance.{{name.id}}s
         end
 
         def delete_{{name.id}}(session_id : String, k : String)
-          return nil unless @store[session_id]?
-          storage_instance = StorageInstance.from_json(@store[session_id])
+          return nil unless storage_instance = active_storage_instance(session_id)
           storage_instance.delete_{{name.id}}(k)
           @store[session_id] = storage_instance.to_json
         end

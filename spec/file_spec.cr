@@ -37,6 +37,8 @@ end
 describe "Session::FileEngine" do
   before_each do
     Kemal::Session.config.secret = "super-awesome-secret"
+    Kemal::Session.config.timeout = 1.hour
+    Kemal::Session.config.gc_interval = 4.minutes
     Kemal::Session.config.engine = Kemal::Session::FileEngine.new({:sessions_dir => SESSION_DIR})
   end
 

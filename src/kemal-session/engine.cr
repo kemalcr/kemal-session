@@ -1,9 +1,11 @@
 require "json"
+require "./expiry"
 
 module Kemal
   class Session
     macro abstract_engine(vars)
     abstract class Engine
+      include ExpiryHelpers
 
       abstract def run_gc
       abstract def all_sessions : Array(Session)

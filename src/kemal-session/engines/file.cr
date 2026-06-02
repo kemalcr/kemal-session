@@ -66,8 +66,24 @@ module Kemal
         each_session do |session|
           full_path = session_filename(session.id)
           age = Time.utc - File.info(full_path).modification_time # mtime is always saved in utc
-          session.destroy if age.total_seconds > Session.config.timeout.total_seconds
+          session.destroy if session_expired?(File.info(full_path).modification_time)
         end
+      end
+
+      private def reject_expired_session!(session_id : String) : Bool
+        return true unless session_exists?(session_id)
+
+        if session_expired?(File.info(session_filename(session_id)).modification_time)
+          destroy_session(session_id)
+          clear_cache if @cached_session_id == session_id
+          return false
+        end
+
+        true
+      end
+
+      private def session_active?(session_id : String) : Bool
+        session_exists?(session_id) && reject_expired_session!(session_id)
       end
 
       def clear_cache
@@ -81,6 +97,9 @@ module Kemal
       end
 
       def is_in_cache?(session_id : String) : Bool
+        return false unless session_id == @cached_session_id
+        return false unless reject_expired_session!(session_id)
+
         if (@cached_session_read_time.to_unix / 60) < (Time.utc.to_unix / 60)
           @cached_session_read_time = Time.utc
           begin
@@ -120,8 +139,8 @@ module Kemal
       end
 
       def get_session(session_id : String) : Session?
-        return Session.new(session_id) if session_exists?(session_id)
-        nil
+        return nil unless session_active?(session_id)
+        Session.new(session_id)
       end
 
       def destroy_session(session_id : String)
@@ -171,27 +190,32 @@ module Kemal
         {% for name, type in vars %}
 
           def {{name.id}}(session_id : String, k : String) : {{type}}
+            raise KeyError.new("Missing hash key: #{k.inspect}") unless session_active?(session_id)
             load_into_cache(session_id) unless is_in_cache?(session_id)
             return @cache.{{name.id}}(k)
           end
 
           def {{name.id}}?(session_id : String, k : String) : {{type}}?
+            return nil unless session_active?(session_id)
             load_into_cache(session_id) unless is_in_cache?(session_id)
             return @cache.{{name.id}}?(k)
           end
 
           def {{name.id}}(session_id : String, k : String, v : {{type}})
+            reject_expired_session!(session_id) if session_exists?(session_id)
             load_into_cache(session_id) unless is_in_cache?(session_id)
             @cache.{{name.id}}(k, v)
             save_cache
           end
 
           def {{name.id}}s(session_id : String) : Hash(String, {{type}})
+            return {} of String => {{type}} unless session_active?(session_id)
             load_into_cache(session_id) unless is_in_cache?(session_id)
             return @cache.{{name.id}}s
           end
 
           def delete_{{name.id}}(session_id : String, k : String)
+            return nil unless session_active?(session_id)
             load_into_cache(session_id) unless is_in_cache?(session_id)
             @cache.delete_{{name.id}}(k)
             save_cache

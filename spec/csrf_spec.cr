@@ -4,6 +4,8 @@ describe "CSRF" do
   before_each do
     Kemal::Session.config.engine = Kemal::Session::MemoryEngine.new
     Kemal::Session.config.secret = "kemal_rocks"
+    Kemal::Session.config.timeout = 1.hour
+    Kemal::Session.config.gc_interval = 4.minutes
   end
 
   it "sends GETs to next handler" do

@@ -1,3 +1,13 @@
+# Unreleased
+
+- **Security**: The CSRF middleware no longer creates a session for anonymous requests. Previously every cookie-less request wrote a new entry to the session store, letting an unauthenticated client exhaust disk (`FileEngine`) or memory (`MemoryEngine`) faster than GC could reclaim it. The token is now created lazily, only when the application reads it (`env.session.string("csrf")`, the new `env.session.csrf_token`, or the new `Kemal::Session::CSRF.token(env)`).
+- **Security**: The middleware leaves `env.session` untouched when a state changing request carries no session cookie, so a cross-site `POST` no longer gets a `Set-Cookie` that would replace the victim's session id. Such a request is rejected with `403` instead of being issued a token it could not have matched.
+- **Hardening**: The CSRF cookie now inherits `secure`, `path`, `domain` and `samesite` from `Kemal::Session.config` instead of being issued without them. Note that `CSRF.new(samesite: nil)` (the default) no longer means "omit the `SameSite` attribute", it means "use `config.samesite`"; set `config.samesite = nil` to omit the attribute on both cookies.
+- **Hardening**: CSRF tokens are compared in constant time (`Crypto::Subtle.constant_time_compare` over SHA-256 digests, so the comparison does not return early on a length mismatch).
+- **Hardening**: A request that submits no CSRF token at all is now rejected before the comparison instead of being matched against the `"nothing"` sentinel, which a session whose token was manually set to `"nothing"` would have accepted.
+- The CSRF cookie is re-issued when the token rotates after a successful request, so a client reading the token from the cookie no longer keeps a stale value.
+- **Breaking**: an application that never reads the CSRF token can no longer hand one out, so its state changing requests are rejected with `403`. Applications that render forms server side are unaffected; JSON APIs and JavaScript frontends should expose a token endpoint (`get "/csrf" { |env| env.session.csrf_token }`), the same pattern as Spring Security's `/csrf` endpoint and Django's `ensure_csrf_cookie`. See the README.
+
 # 1.6.0 (02-06-2026)
 
 - Enforce `config.timeout` on read and write for `MemoryEngine` and `FileEngine`: expired sessions are rejected immediately (no need to wait for GC), stale data is not revived on write, and expired file sessions are removed from disk [#117](https://github.com/kemalcr/kemal-session/pull/117). Thanks @sdogruyol :pray:

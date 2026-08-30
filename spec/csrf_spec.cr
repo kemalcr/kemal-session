@@ -396,6 +396,26 @@ describe "CSRF" do
     end
     Kemal::Session.all.size.should eq 0
   end
+
+  it "supports the documented token endpoint flow for JavaScript clients" do
+    handler = Kemal::Session::CSRF.new
+    io, _ = process_request_with_app(handler, HTTP::Request.new("GET", "/csrf")) do |env|
+      env.response.content_type = "application/json"
+      env.response.print({token: env.session.csrf_token}.to_json)
+    end
+    csrf_response = HTTP::Client::Response.from_io(io, decompress: false)
+    token = JSON.parse(csrf_response.body)["token"].as_s
+
+    handler = Kemal::Session::CSRF.new
+    request = HTTP::Request.new("POST", "/api/messages",
+      body: %({"message":"hello"}),
+      headers: HTTP::Headers{"Content-Type" => "application/json",
+                             "Cookie"       => request_cookie_header(csrf_response),
+                             "X-CSRF-Token" => token})
+    io, _ = process_request_with_app(handler, request, &.response.print("created"))
+
+    HTTP::Client::Response.from_io(io, decompress: false).body.should eq "created"
+  end
 end
 
 def create_request_and_return_io(handler, request)

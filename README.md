@@ -167,6 +167,37 @@ The token is also sent to the client in a cookie (named after `parameter_name`) 
 start writing the response body: once the headers are on the wire the cookie can no longer be added,
 and the token would only exist server side.
 
+#### JavaScript clients and JSON APIs
+
+Because nothing is created until you ask for it, an application that never reads the token has no
+way to hand one out, and every state changing request is rejected with `403`. If your frontend
+builds its own forms, or you serve a JSON API, expose the token explicitly:
+
+```crystal
+get "/csrf" do |env|
+  env.response.content_type = "application/json"
+  {token: env.session.csrf_token}.to_json
+end
+```
+
+Call it when the client starts up and send the value back in the `X_CSRF_TOKEN` header (or in the
+`parameter_name` field). Crystal's `HTTP::Headers` treats `_` and `-` as equivalent, so a browser
+sending the conventional `X-CSRF-Token` header matches the default without any configuration. The
+response also carries the token as a cookie, so a client that would rather read `document.cookie`
+can do that instead. This is the same pattern as Spring Security's `/csrf` endpoint and Django's
+`ensure_csrf_cookie`.
+
+To make the token available across a group of pages, read it in a filter:
+
+```crystal
+before_all "/app/*" do |env|
+  env.session.csrf_token
+end
+```
+
+Scope the filter to the routes that need it. Running it on every route would create a session for
+every anonymous visitor, which is exactly the storage growth the lazy behaviour avoids.
+
 ### Advanced CSRF Configuration
 
 ```crystal

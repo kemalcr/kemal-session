@@ -6,6 +6,7 @@
 - **Hardening**: CSRF tokens are compared in constant time (`Crypto::Subtle.constant_time_compare` over SHA-256 digests, so the comparison does not return early on a length mismatch).
 - **Hardening**: A request that submits no CSRF token at all is now rejected before the comparison instead of being matched against the `"nothing"` sentinel, which a session whose token was manually set to `"nothing"` would have accepted.
 - The CSRF cookie is re-issued when the token rotates after a successful request, so a client reading the token from the cookie no longer keeps a stale value.
+- **Breaking**: an application that never reads the CSRF token can no longer hand one out, so its state changing requests are rejected with `403`. Applications that render forms server side are unaffected; JSON APIs and JavaScript frontends should expose a token endpoint (`get "/csrf" { |env| env.session.csrf_token }`), the same pattern as Spring Security's `/csrf` endpoint and Django's `ensure_csrf_cookie`. See the README.
 
 # 1.6.0 (02-06-2026)
 

@@ -7,6 +7,12 @@ class HTTP::Server::Context
   property! session : Kemal::Session
   property! flash : Kemal::Session::Flash
 
+  # :nodoc:
+  # The CSRF handler serving this request, if the middleware is installed. It
+  # provides the cookie settings used when the CSRF token is materialised
+  # lazily by the application.
+  property csrf_handler : Kemal::Session::CSRF?
+
   def session
     @session ||= Kemal::Session.new(self)
     @session.not_nil!

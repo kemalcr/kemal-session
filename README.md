@@ -142,6 +142,31 @@ end
 Kemal.run
 ```
 
+#### How the token is created
+
+The token is created **lazily**, only when your application asks for it. The middleware itself never
+creates one, so anonymous visitors, crawlers and unauthenticated `POST`s leave nothing behind in
+session storage. A state changing request that arrives without a session, or with a session that has
+no token yet, is rejected with `403` instead of being handed a freshly minted token it could not
+have matched anyway.
+
+Reading the token materialises it, so the usage shown above keeps working as is. These are all
+equivalent:
+
+```crystal
+env.session.string("csrf")          # documented usage, creates the token on demand
+env.session.csrf_token              # same thing, more explicit
+Kemal::Session::CSRF.token(env)     # same thing, without going through the session
+```
+
+`env.session.string?("csrf")` stays a plain existence check and returns `nil` while no token has
+been created yet.
+
+The token is also sent to the client in a cookie (named after `parameter_name`) which inherits
+`secure`, `path`, `domain` and `samesite` from `Kemal::Session.config`. Read the token before you
+start writing the response body: once the headers are on the wire the cookie can no longer be added,
+and the token would only exist server side.
+
 ### Advanced CSRF Configuration
 
 ```crystal
